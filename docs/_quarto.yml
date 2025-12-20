@@ -1,0 +1,33 @@
+project:
+  type: book
+  output-dir: _book
+
+book:
+  title: "Learning SQL"
+  author: "Alan Beaulieu"
+  chapters:
+    - index.qmd
+    - chapters/01-introduction/01-introduction.qmd
+    - chapters/02-create-populate-db/02-create-populate-db.qmd
+    - chapters/03-query-primer/03-query-primer.qmd
+    - chapters/04-filtering/04-filtering.qmd
+    - chapters/05-multi-table-queries/05-multi-table-queries.qmd
+    - chapters/06-set-operations/06-set-operations.qmd
+    - chapters/07-data-manipulation/07-data-manipulation.qmd
+    - chapters/08-grouping-aggregates/08-grouping-aggregates.qmd
+    - chapters/09-subqueries/09-subqueries.qmd
+    - chapters/10-joins-revisited/10-joins-revisited.qmd
+    - chapters/11-conditional-logic/11-conditional-logic.qmd
+    - chapters/12-transactions/12-transactions.qmd
+    - glossary.qmd
+
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    theme: cosmo
+  pdf:
+    documentclass: book
+    toc: true
+    number-sections: true

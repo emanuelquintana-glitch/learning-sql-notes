@@ -1,0 +1,46 @@
+{
+  "name": "learning-sql-notes",
+  "version": "0.1.0",
+  "description": "SQL learning repository with multiple programming language integrations",
+  "main": "src/javascript/index.js",
+  "scripts": {
+    "start": "node src/javascript/index.js",
+    "dev": "nodemon src/javascript/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/javascript/",
+    "lint:fix": "eslint src/javascript/ --fix",
+    "format": "prettier --write src/javascript/",
+    "build": "npm run lint && npm run test"
+  },
+  "keywords": [
+    "sql",
+    "database",
+    "learning",
+    "javascript",
+    "nodejs"
+  ],
+  "author": "Emanuel <emanuel@example.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-jest": "^27.0.0",
+    "prettier": "^3.0.0",
+    "nodemon": "^3.0.0"
+  },
+  "dependencies": {
+    "mysql2": "^3.0.0",
+    "pg": "^8.0.0",
+    "sequelize": "^6.0.0",
+    "sqlite3": "^5.0.0",
+    "express": "^4.0.0",
+    "dotenv": "^16.0.0"
+  }
+}

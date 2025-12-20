@@ -1,0 +1,28 @@
+\documentclass[12pt,oneside]{book}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+% Configuración de listings para SQL y código
+\lstdefinelanguage{SQL}{
+    keywords={SELECT, FROM, WHERE, INSERT, UPDATE, DELETE, JOIN, INNER, LEFT, RIGHT, ON, GROUP, BY, ORDER, ASC, DESC, CREATE, TABLE, PRIMARY, KEY, VALUES},
+    keywordstyle=\color{blue}\bfseries,
+    morecomment=[l]{--},
+    morestring=[b]',
+    commentstyle=\color{gray}\itshape,
+    stringstyle=\color{red},
+    showstringspaces=false,
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    numbersep=5pt
+}
+\lstset{language=SQL}

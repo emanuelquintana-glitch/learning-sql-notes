@@ -1,0 +1,28 @@
+# Core dependencies
+sqlalchemy>=2.0.0
+pandas>=2.0.0
+numpy>=1.24.0
+jupyter>=1.0.0
+
+# Database connectors
+psycopg2-binary>=2.9.0
+mysql-connector-python>=8.0.0
+sqlite3
+
+# Web/API frameworks (optional)
+flask>=2.0.0
+fastapi>=0.68.0
+
+# Data visualization
+matplotlib>=3.5.0
+seaborn>=0.11.0
+plotly>=5.0.0
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Development tools
+black>=22.0.0
+flake8>=5.0.0
+pre-commit>=3.0.0

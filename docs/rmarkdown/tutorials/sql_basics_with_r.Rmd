@@ -1,0 +1,22 @@
+---
+title: "Análisis SQL con R: Fundamentos"
+author: "Emanuel Quintana Silva"
+date: "`r format(Sys.Date(), '%d de %B, %Y')`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    code_folding: show
+  pdf_document:
+    toc: true
+fontsize: 11pt
+geometry: margin=2cm
+fontsize: 11pt
+linestretch: 1.2
+header-includes:
+  - \usepackage{booktabs}
+  - \usepackage{longtable}
+---
+
