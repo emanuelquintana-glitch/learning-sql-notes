@@ -85,7 +85,7 @@ learning-sql-notes/
 - **3 sistemas de bases de datos** (MySQL, PostgreSQL, SQLite)
 - **Niveles de dificultad**: Básico, Intermedio, Avanzado
 
-##  Roadmap de Aprendizaje
+##  Roadmap de Aprendizaje.
 
 ###  **Nivel Básico** (Fundamentos)
 1. **SQL Essentials**
