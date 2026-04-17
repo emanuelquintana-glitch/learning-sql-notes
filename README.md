@@ -244,7 +244,7 @@ Este proyecto se inspira en (pero **NO incluye contenido completo de**):
 - Bases de Datos y SQL para Ciencias Sociales
 - Visualización de Datos Económicos
 
-##  Licencia y Uso Ético
+##  Licencia y Uso Ético.
 
 ###  **Licencia Educativa**
 Este proyecto utiliza una **Licencia Educativa - Atribución** que:
