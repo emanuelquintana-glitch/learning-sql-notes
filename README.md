@@ -1,3 +1,8 @@
+<h1 align="center">
+  
+   ***Learning SQL & Programming Notes***
+</h1>
+
 <p align="center">
   <img src="https://img.shields.io/badge/SQL-MySQL%20%7C%20PostgreSQL%20%7C%20SQLite-blue" alt="SQL">
   <img src="https://img.shields.io/badge/Python-3.8%2B-blue" alt="Python">
@@ -7,10 +12,7 @@
   <img src="https://img.shields.io/badge/UPTC-Econom%C3%ADa-red" alt="UPTC">
 </p>
 
-<h1 align="center">
-  
-   ***Learning SQL & Programming Notes***
-</h1>
+
 
 <p align="center">
   <strong>Portafolio de aprendizaje profesional - SQL y programación multi-lenguaje</strong>
