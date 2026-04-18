@@ -38,7 +38,7 @@
   
 </div>
 
-##  Características
+##  Características.
 
 ###  **Aprendizaje Integral**
 - **SQL Completo**: Desde `SELECT` básico hasta funciones de ventana y optimización
