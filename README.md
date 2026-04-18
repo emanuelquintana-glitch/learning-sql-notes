@@ -1,6 +1,6 @@
 <h1 align="center">
   
-   ***Learning SQL & Programming Notes***
+   ***Learning SQL & Programming Notes,***
 </h1>
 
 <p align="center">
