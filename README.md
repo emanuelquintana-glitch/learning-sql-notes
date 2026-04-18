@@ -154,7 +154,7 @@ Testing:    "pytest, JUnit, Jest"
 CI/CD:      "GitHub Actions"
 ```
 
-##  Configuración Rápida
+##  Configuración Rápida.
 
 ###  **Requisitos Previos**
 ```bash
