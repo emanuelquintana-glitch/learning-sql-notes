@@ -33,7 +33,7 @@
   -- Este proyecto transforma conocimiento en código
   SELECT conocimiento, práctica, proyecto 
   FROM aprendizaje 
-  WHERE estudiante = 'Emanuel Quintana';
+  WHERE estudiante = 'Emanuel Quintana Silva';
   ```
   
 </div>
