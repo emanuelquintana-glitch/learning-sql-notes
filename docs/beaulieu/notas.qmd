@@ -32,6 +32,21 @@ format:
 
 # Resumen ejecutivo
 
+SQLite es un sistema de gestión de bases de datos relacionales (RDBMS) de dominio público, ligero y autosuficiente, diseñado para almacenar y gestionar datos de manera eficiente sin requerir un servidor separado.
+
+SQLite proporciona una implementación completa de un RDBMS, lo que significa que puede almacenar y gestionar registros definidos por el usuario en grandes tablas. Además, puede procesar comandos de consulta complejos que combinan datos de múltiples tablas para generar informes y resúmenes de datos. La arquitectura de SQLite se basa en los siguientes principios:
+
+- ****Serverless****: SQLite no requiere un proceso de servidor separado o sistema para operar. En su lugar, la biblioteca de SQLite accede directamente a los archivos de almacenamiento. Esto se puede representar como:
+
+$$ \text{Aplicación} \leftrightarrow \text{Biblioteca de SQLite} \leftrightarrow \text{Archivo de almacenamiento} $$
+
+- ****Zero Configuration****: Debido a que no hay servidor, no hay configuración necesaria. La creación de una instancia de base de datos SQLite es tan sencilla como abrir un archivo.
+- ****Cross-Platform****: La instancia de base de datos completa reside en un solo archivo cross-platform, lo que elimina la necesidad de administración adicional.
+- ****Autocontenido****: Una sola biblioteca contiene el sistema de base de datos completo, que se integra directamente en una aplicación host.
+- ****Pequeña huella de ejecución****: La construcción predeterminada es menos de un megabyte de código y requiere solo algunos megabytes de memoria. Con algunos ajustes, tanto el tamaño de la biblioteca como el uso de memoria se pueden reducir significativamente.
+
+SQLite se encuentra en el contexto de los sistemas de gestión de bases de datos relacionales, que son fundamentales en la informática y las ciencias de la información. Autores clave en este campo incluyen a Edgar F. Codd, quien desarrolló el modelo relacional, y a Larry Ellison, cofundador de Oracle. El debate actual en este campo se centra en la comparación entre los diferentes RDBMS, incluyendo aspectos como el rendimiento, la escalabilidad y la seguridad. SQLite es particularmente popular en aplicaciones embebidas y en dispositivos móviles debido a su pequeño tamaño y bajo consumo de recursos.
+
 # Por qué lo leo / Objetivo de lectura
 
 # Ideas principales
