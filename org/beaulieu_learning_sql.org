@@ -1,1 +1,0 @@
-/home/emanuel/org/libros/Lenguajes_de_Programacion/learning-sql-generate-manipulate-and-retrieve-data.org
