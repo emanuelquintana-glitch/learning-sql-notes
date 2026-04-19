@@ -237,6 +237,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#opinión-personal" id="toc-opinión-personal" class="nav-link" data-scroll-target="#opinión-personal"><span class="header-section-number">14.1</span> Opinión personal</a></li>
   </ul></li>
   <li><a href="#anotaciones-del-pdf" id="toc-anotaciones-del-pdf" class="nav-link" data-scroll-target="#anotaciones-del-pdf"><span class="header-section-number">15</span> Anotaciones del PDF</a></li>
+  <li><a href="#notas-por-capítulo-1" id="toc-notas-por-capítulo-1" class="nav-link" data-scroll-target="#notas-por-capítulo-1"><span class="header-section-number">16</span> Notas por capítulo</a>
+  <ul class="collapse">
+  <li><a href="#capítulo-1-a-little-background" id="toc-capítulo-1-a-little-background" class="nav-link" data-scroll-target="#capítulo-1-a-little-background"><span class="header-section-number">16.1</span> Capítulo 1 — A Little Background</a>
+  <ul class="collapse">
+  <li><a href="#resumen-1" id="toc-resumen-1" class="nav-link" data-scroll-target="#resumen-1"><span class="header-section-number">16.1.1</span> Resumen</a></li>
+  <li><a href="#conceptos-clave-1" id="toc-conceptos-clave-1" class="nav-link" data-scroll-target="#conceptos-clave-1"><span class="header-section-number">16.1.2</span> Conceptos clave</a></li>
+  <li><a href="#base-de-datos-del-libro" id="toc-base-de-datos-del-libro" class="nav-link" data-scroll-target="#base-de-datos-del-libro"><span class="header-section-number">16.1.3</span> Base de datos del libro</a></li>
+  <li><a href="#setup-crear-la-base-de-datos" id="toc-setup-crear-la-base-de-datos" class="nav-link" data-scroll-target="#setup-crear-la-base-de-datos"><span class="header-section-number">16.1.4</span> Setup — crear la base de datos</a></li>
+  <li><a href="#primeros-queries-explorar-las-tablas" id="toc-primeros-queries-explorar-las-tablas" class="nav-link" data-scroll-target="#primeros-queries-explorar-las-tablas"><span class="header-section-number">16.1.5</span> Primeros queries — explorar las tablas</a></li>
+  <li><a href="#preguntas-y-dudas-1" id="toc-preguntas-y-dudas-1" class="nav-link" data-scroll-target="#preguntas-y-dudas-1"><span class="header-section-number">16.1.6</span> Preguntas y dudas</a></li>
+  </ul></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -388,8 +400,128 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="anotaciones-del-pdf" class="level1" data-number="15">
 <h1 data-number="15"><span class="header-section-number">15</span> Anotaciones del PDF</h1>
+</section>
+<section id="notas-por-capítulo-1" class="level1" data-number="16">
+<h1 data-number="16"><span class="header-section-number">16</span> Notas por capítulo</h1>
+<section id="capítulo-1-a-little-background" class="level2" data-number="16.1">
+<h2 data-number="16.1" class="anchored" data-anchor-id="capítulo-1-a-little-background"><span class="header-section-number">16.1</span> Capítulo 1 — A Little Background</h2>
+<section id="resumen-1" class="level3" data-number="16.1.1">
+<h3 data-number="16.1.1" class="anchored" data-anchor-id="resumen-1"><span class="header-section-number">16.1.1</span> Resumen</h3>
+<p>SQL es un lenguaje diseñado para interactuar con bases de datos relacionales. El modelo relacional (Codd, 1970) organiza los datos en tablas (relaciones) con filas (tuplas) y columnas (atributos). SQL tiene tres sublengajes:</p>
+<ul>
+<li><strong>DDL</strong> (Data Definition Language): CREATE, ALTER, DROP</li>
+<li><strong>DML</strong> (Data Manipulation Language): SELECT, INSERT, UPDATE, DELETE</li>
+<li><strong>DCL</strong> (Data Control Language): GRANT, REVOKE</li>
+</ul>
+</section>
+<section id="conceptos-clave-1" class="level3" data-number="16.1.2">
+<h3 data-number="16.1.2" class="anchored" data-anchor-id="conceptos-clave-1"><span class="header-section-number">16.1.2</span> Conceptos clave</h3>
+<ul>
+<li><strong>Entidad</strong>: objeto del mundo real representado en la BD (cliente, cuenta)</li>
+<li><strong>Clave primaria</strong>: columna(s) que identifican únicamente cada fila</li>
+<li><strong>Clave foránea</strong>: columna que referencia la PK de otra tabla</li>
+<li><strong>Normalización</strong>: proceso de eliminar redundancia en las tablas</li>
+<li><strong>Conjunto de resultados</strong>: tabla no persistente devuelta por un SELECT</li>
+</ul>
+</section>
+<section id="base-de-datos-del-libro" class="level3" data-number="16.1.3">
+<h3 data-number="16.1.3" class="anchored" data-anchor-id="base-de-datos-del-libro"><span class="header-section-number">16.1.3</span> Base de datos del libro</h3>
+<p>La base de datos bancaria (<code>bank</code>) tiene estas tablas principales:</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Tabla</th>
+<th style="text-align: left;">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">department</td>
+<td style="text-align: left;">Departamentos del banco</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">employee</td>
+<td style="text-align: left;">Empleados</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">branch</td>
+<td style="text-align: left;">Sucursales</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">product</td>
+<td style="text-align: left;">Tipos de cuenta/préstamo</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">customer</td>
+<td style="text-align: left;">Clientes (individuos y empresas)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">individual</td>
+<td style="text-align: left;">Datos personales de clientes</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">business</td>
+<td style="text-align: left;">Datos de empresas clientes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">account</td>
+<td style="text-align: left;">Cuentas bancarias</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">acc<sub>transaction</sub></td>
+<td style="text-align: left;">Transacciones</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="setup-crear-la-base-de-datos" class="level3" data-number="16.1.4">
+<h3 data-number="16.1.4" class="anchored" data-anchor-id="setup-crear-la-base-de-datos"><span class="header-section-number">16.1.4</span> Setup — crear la base de datos</h3>
+<pre class="duckdb" data-db="~/repos/github/learning-sql-notes/databases/practice/bank.duckdb" data-results="output"><code>-- Crear todas las tablas con datos
+-- (pegar contenido de src/sql/beaulieu/01/bank_schema.sql)
+SELECT 'Base de datos lista' AS status;</code></pre>
+</section>
+<section id="primeros-queries-explorar-las-tablas" class="level3" data-number="16.1.5">
+<h3 data-number="16.1.5" class="anchored" data-anchor-id="primeros-queries-explorar-las-tablas"><span class="header-section-number">16.1.5</span> Primeros queries — explorar las tablas</h3>
+<pre class="duckdb" data-db="~/repos/github/learning-sql-notes/databases/practice/bank.duckdb"><code>-- ¿Cuántos empleados hay?
+SELECT COUNT(*) AS total_empleados FROM employee;</code></pre>
+<pre class="duckdb" data-db="~/repos/github/learning-sql-notes/databases/practice/bank.duckdb"><code>-- Ver todos los empleados con su departamento
+SELECT e.emp_id,
+       e.fname || ' ' || e.lname AS nombre,
+       e.title,
+       d.name AS departamento
+FROM employee e
+JOIN department d ON e.dept_id = d.dept_id
+ORDER BY e.emp_id;</code></pre>
+<pre class="duckdb" data-db="~/repos/github/learning-sql-notes/databases/practice/bank.duckdb"><code>-- Cuentas activas con saldo disponible
+SELECT a.account_id,
+       i.fname || ' ' || i.lname AS cliente,
+       a.product_cd AS tipo,
+       a.avail_balance AS saldo
+FROM account a
+JOIN customer c ON a.cust_id = c.cust_id
+JOIN individual i ON c.cust_id = i.cust_id
+WHERE a.status = 'ACTIVE'
+ORDER BY a.avail_balance DESC;</code></pre>
+<pre class="duckdb" data-db="~/repos/github/learning-sql-notes/databases/practice/bank.duckdb"><code>-- Resumen de saldos por tipo de producto
+SELECT product_cd,
+       COUNT(*)              AS num_cuentas,
+       SUM(avail_balance)    AS saldo_total,
+       AVG(avail_balance)    AS saldo_promedio
+FROM account
+WHERE status = 'ACTIVE'
+GROUP BY product_cd
+ORDER BY saldo_total DESC;</code></pre>
+</section>
+<section id="preguntas-y-dudas-1" class="level3" data-number="16.1.6">
+<h3 data-number="16.1.6" class="anchored" data-anchor-id="preguntas-y-dudas-1"><span class="header-section-number">16.1.6</span> Preguntas y dudas</h3>
+<ul>
+<li><p>¿Por qué <code>individual</code> y <code>business</code> son tablas separadas de <code>customer</code>? → Herencia de tabla: <code>customer</code> tiene los campos comunes, las subclases tienen los específicos. Patrón común en modelado relacional.</p></li>
+<li><p>¿Qué es <code>pending_balance</code> vs <code>avail_balance</code>? → <code>avail_balance</code>: saldo disponible ahora. → <code>pending_balance</code>: incluye transacciones no liquidadas aún.</p></li>
+</ul>
 
 
+</section>
+</section>
 </section>
 
 </main> <!-- /main -->
