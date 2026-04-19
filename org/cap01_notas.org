@@ -1,0 +1,161 @@
+* Notas por capítulo
+** Capítulo 1 — A Little Background
+*** Resumen
+
+SQL es un lenguaje diseñado para interactuar con bases de datos relacionales.
+El modelo relacional (Codd, 1970) organiza los datos en tablas (relaciones)
+con filas (tuplas) y columnas (atributos). SQL tiene tres sublengajes:
+
+- *DDL* (Data Definition Language): CREATE, ALTER, DROP
+- *DML* (Data Manipulation Language): SELECT, INSERT, UPDATE, DELETE
+- *DCL* (Data Control Language): GRANT, REVOKE
+
+*** Conceptos clave
+
+- *Entidad*: objeto del mundo real representado en la BD (cliente, cuenta)
+- *Clave primaria*: columna(s) que identifican únicamente cada fila
+- *Clave foránea*: columna que referencia la PK de otra tabla
+- *Normalización*: proceso de eliminar redundancia en las tablas
+- *Conjunto de resultados*: tabla no persistente devuelta por un SELECT
+
+*** Base de datos del libro
+
+La base de datos bancaria (~bank~) tiene estas tablas principales:
+
+| Tabla           | Descripción                        |
+|-----------------+------------------------------------|
+| department      | Departamentos del banco            |
+| employee        | Empleados                          |
+| branch          | Sucursales                         |
+| product         | Tipos de cuenta/préstamo           |
+| customer        | Clientes (individuos y empresas)   |
+| individual      | Datos personales de clientes       |
+| business        | Datos de empresas clientes         |
+| account         | Cuentas bancarias                  |
+| acc_transaction | Transacciones                      |
+
+*** Setup — crear la base de datos
+
+#+BEGIN_SRC duckdb :db ~/repos/github/learning-sql-notes/databases/practice/bank.duckdb :results output
+-- Crear todas las tablas con datos
+-- (pegar contenido de src/sql/beaulieu/01/bank_schema.sql)
+SELECT 'Base de datos lista' AS status;
+#+END_SRC
+
+#+RESULTS:
+: | status |
+: |-
+: | Base de datos lista |
+
+*** Primeros queries — explorar las tablas
+
+#+BEGIN_SRC duckdb :db ~/repos/github/learning-sql-notes/databases/practice/bank.duckdb
+-- ¿Cuántos empleados hay?
+SELECT COUNT(*) AS total_empleados FROM employee;
+#+END_SRC
+
+#+RESULTS:
+|    | total_empleados |
+|----+-----------------|
+| 18 |                 |
+
+#+BEGIN_SRC duckdb :db ~/repos/github/learning-sql-notes/databases/practice/bank.duckdb
+-- Ver todos los empleados con su departamento
+SELECT e.emp_id,
+       e.fname || ' ' || e.lname AS nombre,
+       e.title,
+       d.name AS departamento
+FROM employee e
+JOIN department d ON e.dept_id = d.dept_id
+ORDER BY e.emp_id;
+#+END_SRC
+
+#+RESULTS:
+|    | emp_id           | nombre             | title          | departamento |
+|----+------------------+--------------------+----------------+--------------|
+|  1 | Michael Smith    | President          | Administration |              |
+|  2 | Susan Barker     | Vice President     | Administration |              |
+|  3 | Robert Tyler     | Treasurer          | Administration |              |
+|  4 | Susan Hawthorne  | Operations Manager | Operations     |              |
+|  5 | John Gooding     | Loan Manager       | Loans          |              |
+|  6 | Helen Fleming    | Head Teller        | Operations     |              |
+|  7 | Chris Tucker     | Teller             | Operations     |              |
+|  8 | Sarah Parker     | Teller             | Operations     |              |
+|  9 | Jane Grossman    | Teller             | Operations     |              |
+| 10 | Paula Roberts    | Head Teller        | Operations     |              |
+| 11 | Thomas Ziegler   | Teller             | Operations     |              |
+| 12 | Samantha Jameson | Teller             | Operations     |              |
+| 13 | John Blake       | Head Teller        | Operations     |              |
+| 14 | Cindy Mason      | Teller             | Operations     |              |
+| 15 | Frank Portman    | Teller             | Operations     |              |
+| 16 | Theresa Markham  | Head Teller        | Operations     |              |
+| 17 | Beth Fowler      | Teller             | Operations     |              |
+| 18 | Rick Tulman      | Teller             | Operations     |              |
+
+#+BEGIN_SRC duckdb :db ~/repos/github/learning-sql-notes/databases/practice/bank.duckdb
+-- Cuentas activas con saldo disponible
+SELECT a.account_id,
+       i.fname || ' ' || i.lname AS cliente,
+       a.product_cd AS tipo,
+       a.avail_balance AS saldo
+FROM account a
+JOIN customer c ON a.cust_id = c.cust_id
+JOIN individual i ON c.cust_id = i.cust_id
+WHERE a.status = 'ACTIVE'
+ORDER BY a.avail_balance DESC;
+#+END_SRC
+
+#+RESULTS:
+|    | account_id      | cliente |     tipo | saldo |
+|----+-----------------+---------+----------+-------|
+| 17 | John Spencer    | CD      | 10000.00 |       |
+| 22 | Louis Blake     | MM      |  9345.55 |       |
+| 12 | John Hayward    | MM      |  5487.09 |       |
+| 18 | Margaret Young  | CHK     |  3487.19 |       |
+| 23 | Richard Farley  | CHK     |  3487.19 |       |
+|  3 | James Hadley    | CHK     |  3000.00 |       |
+|  4 | Susan Tingley   | CHK     |  2258.02 |       |
+|  8 | Frank Tucker    | MM      |  2212.50 |       |
+| 14 | John Spencer    | CHK     |  1342.45 |       |
+|  1 | James Hadley    | CHK     |  1057.75 |       |
+|  7 | Frank Tucker    | CHK     |  1057.75 |       |
+| 11 | John Hayward    | SAV     |   767.77 |       |
+| 10 | John Hayward    | CHK     |   534.12 |       |
+|  2 | James Hadley    | SAV     |   500.00 |       |
+| 19 | Margaret Young  | SAV     |   387.99 |       |
+| 13 | Charles Frasier | CHK     |   246.25 |       |
+|  5 | Susan Tingley   | SAV     |   200.00 |       |
+| 15 | John Spencer    | SAV     |   200.00 |       |
+| 21 | Louis Blake     | CHK     |   125.67 |       |
+
+#+BEGIN_SRC duckdb :db ~/repos/github/learning-sql-notes/databases/practice/bank.duckdb
+-- Resumen de saldos por tipo de producto
+SELECT product_cd,
+       COUNT(*)              AS num_cuentas,
+       SUM(avail_balance)    AS saldo_total,
+       AVG(avail_balance)    AS saldo_promedio
+FROM account
+WHERE status = 'ACTIVE'
+GROUP BY product_cd
+ORDER BY saldo_total DESC;
+#+END_SRC
+
+#+RESULTS:
+|     | product_cd | num_cuentas |        saldo_total | saldo_promedio |
+|-----+------------+-------------+--------------------+----------------|
+| SBL |          1 |    50000.00 |            50000.0 |                |
+| CHK |         13 |    32787.16 | 2522.0892307692307 |                |
+| MM  |          3 |    17045.14 |  5681.713333333333 |                |
+| CD  |          1 |    10000.00 |            10000.0 |                |
+| SAV |          5 |     2055.76 |            411.152 |                |
+| BUS |          2 |        0.00 |                0.0 |                |
+
+*** Preguntas y dudas
+
+- ¿Por qué ~individual~ y ~business~ son tablas separadas de ~customer~?
+  → Herencia de tabla: ~customer~ tiene los campos comunes, las subclases
+  tienen los específicos. Patrón común en modelado relacional.
+
+- ¿Qué es ~pending_balance~ vs ~avail_balance~?
+  → ~avail_balance~: saldo disponible ahora.
+  → ~pending_balance~: incluye transacciones no liquidadas aún.
