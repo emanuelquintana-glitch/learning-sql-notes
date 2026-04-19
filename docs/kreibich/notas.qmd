@@ -1,0 +1,91 @@
+---
+title: "Using SQLite — Kreibich (2010)"
+date: "2026-04-18"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+  pdf:
+    toc: true
+---
+
+```{=org}
+#+CATEGORY: Lenguajes de Programacion
+```
+```{=org}
+#+FILETAGS: :libro:lenguajes_de_programacion:
+```
+```{=org}
+#+ROAM_ALIASES: "Using SQLite _ [Small_ Fast_ Reliable_ Choose any three"
+```
+# Metadatos {#metadatos tipo="libro"}
+
+  Campo       Valor
+  ----------- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Título      Using SQLite \_ \[Small\_ Fast\_ Reliable\_ Choose any three
+  Autor       Jay A\_ Kreibich
+  Año         2010
+  Editorial   O\'Reilly Media, Incorporated
+  Categoría   Lenguajes de Programacion
+  Iniciado    2026-04-18
+  Archivo     \[\[<file:/home/emanuel/Biblioteca/cursos_mit/Electrical> Engineering and Computer Science (Course 6)/02~Programming~\_Languages/Using SQLite \_ \[Small\_ Fast\_ Reliable\_ Choose any three -- Jay A\_ Kreibich -- 1st ed, Sebastopol, Calif, 2010 -- O\'Reilly Media, Incorporated -- isbn13 9780596521189 -- f5659c5ad500c400ff7bd98aa6c304f8 -- Anna's Archive.pdf\]\[PDF\]\]
+
+# Resumen ejecutivo
+
+# Por qué lo leo / Objetivo de lectura
+
+# Ideas principales
+
+## Idea 1
+
+## Idea 2
+
+## Idea 3
+
+# Notas por capítulo
+
+## Capítulo 1
+
+### Resumen
+
+### Conceptos clave
+
+### Preguntas y dudas
+
+# Citas y fragmentos destacados
+
+# Vocabulario técnico nuevo
+
+  Término   Definición   Página
+  --------- ------------ --------
+                         
+
+# Ejercicios y problemas resueltos
+
+# Código relevante
+
+``` {.python results="output"}
+# Ejemplo del libro
+```
+
+# Conexiones con otros libros/conceptos
+
+# Aplicaciones prácticas
+
+# Valoración final
+
+Dificultad
+:   \[ \] Fácil \[ \] Medio \[ \] Difícil \[ \] Muy difícil
+
+Utilidad
+:   \[ \] Baja \[ \] Media \[ \] Alta \[ \] Esencial
+
+Recomendaría
+:   \[ \] Sí \[ \] No \[ \] Con reservas
+
+Releer
+:   \[ \] Sí \[ \] No
+
+## Opinión personal
+
+# Anotaciones del PDF

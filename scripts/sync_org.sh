@@ -123,5 +123,10 @@ INDEX
 fi
 
 echo ""
+export_org_to_qmd \
+    "$ORG_DIR/using-sqlite-small-fast-reliable-choose-any-three.org" \
+    "$DOCS_DIR/kreibich/notas.qmd" \
+    "Using SQLite — Kreibich (2010)"
+
 echo "=== Sync completo ==="
 echo "Para renderizar: cd docs && quarto render"
