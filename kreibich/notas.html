@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2026-04-18">
+<meta name="dcterms.date" content="2026-04-19">
 
 <title>Learning SQL Notes - 4&nbsp; Using SQLite — Kreibich (2010)</title>
 <style>
@@ -103,6 +103,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -255,7 +284,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">April 18, 2026</p>
+      <p class="date">April 19, 2026</p>
     </div>
   </div>
   
@@ -310,6 +339,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="resumen-ejecutivo" class="level1" data-number="6">
 <h1 data-number="6"><span class="header-section-number">6</span> Resumen ejecutivo</h1>
+<p>SQLite es un sistema de gestión de bases de datos relacionales (RDBMS) de dominio público, ligero y autosuficiente, diseñado para almacenar y gestionar datos de manera eficiente sin requerir un servidor separado.</p>
+<p>SQLite proporciona una implementación completa de un RDBMS, lo que significa que puede almacenar y gestionar registros definidos por el usuario en grandes tablas. Además, puede procesar comandos de consulta complejos que combinan datos de múltiples tablas para generar informes y resúmenes de datos. La arquitectura de SQLite se basa en los siguientes principios:</p>
+<ul>
+<li>****Serverless****: SQLite no requiere un proceso de servidor separado o sistema para operar. En su lugar, la biblioteca de SQLite accede directamente a los archivos de almacenamiento. Esto se puede representar como:</li>
+</ul>
+<p><span class="math display">\[ \text{Aplicación} \leftrightarrow \text{Biblioteca de SQLite} \leftrightarrow \text{Archivo de almacenamiento} \]</span></p>
+<ul>
+<li>****Zero Configuration****: Debido a que no hay servidor, no hay configuración necesaria. La creación de una instancia de base de datos SQLite es tan sencilla como abrir un archivo.</li>
+<li>****Cross-Platform****: La instancia de base de datos completa reside en un solo archivo cross-platform, lo que elimina la necesidad de administración adicional.</li>
+<li>****Autocontenido****: Una sola biblioteca contiene el sistema de base de datos completo, que se integra directamente en una aplicación host.</li>
+<li>****Pequeña huella de ejecución****: La construcción predeterminada es menos de un megabyte de código y requiere solo algunos megabytes de memoria. Con algunos ajustes, tanto el tamaño de la biblioteca como el uso de memoria se pueden reducir significativamente.</li>
+</ul>
+<p>SQLite se encuentra en el contexto de los sistemas de gestión de bases de datos relacionales, que son fundamentales en la informática y las ciencias de la información. Autores clave en este campo incluyen a Edgar F. Codd, quien desarrolló el modelo relacional, y a Larry Ellison, cofundador de Oracle. El debate actual en este campo se centra en la comparación entre los diferentes RDBMS, incluyendo aspectos como el rendimiento, la escalabilidad y la seguridad. SQLite es particularmente popular en aplicaciones embebidas y en dispositivos móviles debido a su pequeño tamaño y bajo consumo de recursos.</p>
 </section>
 <section id="por-qué-lo-leo-objetivo-de-lectura" class="level1" data-number="7">
 <h1 data-number="7"><span class="header-section-number">7</span> Por qué lo leo / Objetivo de lectura</h1>
