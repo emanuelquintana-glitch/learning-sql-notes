@@ -87,3 +87,131 @@ Término & Definición & Página \\
 \subsection{Opinión personal}\label{opiniuxf3n-personal}
 
 \section{Anotaciones del PDF}\label{anotaciones-del-pdf}
+
+\section{Notas por capítulo}\label{notas-por-capuxedtulo-1}
+
+\subsection{Capítulo 1 --- A Little Background}\label{capuxedtulo-1-a-little-background}
+
+\subsubsection{Resumen}\label{resumen-1}
+
+SQL es un lenguaje diseñado para interactuar con bases de datos relacionales. El modelo relacional (Codd, 1970) organiza los datos en tablas (relaciones) con filas (tuplas) y columnas (atributos). SQL tiene tres sublengajes:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{DDL} (Data Definition Language): CREATE, ALTER, DROP
+\item
+  \textbf{DML} (Data Manipulation Language): SELECT, INSERT, UPDATE, DELETE
+\item
+  \textbf{DCL} (Data Control Language): GRANT, REVOKE
+\end{itemize}
+
+\subsubsection{Conceptos clave}\label{conceptos-clave-1}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Entidad}: objeto del mundo real representado en la BD (cliente, cuenta)
+\item
+  \textbf{Clave primaria}: columna(s) que identifican únicamente cada fila
+\item
+  \textbf{Clave foránea}: columna que referencia la PK de otra tabla
+\item
+  \textbf{Normalización}: proceso de eliminar redundancia en las tablas
+\item
+  \textbf{Conjunto de resultados}: tabla no persistente devuelta por un SELECT
+\end{itemize}
+
+\subsubsection{Base de datos del libro}\label{base-de-datos-del-libro}
+
+La base de datos bancaria (\texttt{bank}) tiene estas tablas principales:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Tabla & Descripción \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+department & Departamentos del banco \\
+employee & Empleados \\
+branch & Sucursales \\
+product & Tipos de cuenta/préstamo \\
+customer & Clientes (individuos y empresas) \\
+individual & Datos personales de clientes \\
+business & Datos de empresas clientes \\
+account & Cuentas bancarias \\
+acc\textsubscript{transaction} & Transacciones \\
+\end{longtable}
+}
+
+\subsubsection{Setup --- crear la base de datos}\label{setup-crear-la-base-de-datos}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{{-}{-} Crear todas las tablas con datos}
+\NormalTok{{-}{-} (pegar contenido de src/sql/beaulieu/01/bank\_schema.sql)}
+\NormalTok{SELECT \textquotesingle{}Base de datos lista\textquotesingle{} AS status;}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{Primeros queries --- explorar las tablas}\label{primeros-queries-explorar-las-tablas}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{{-}{-} ¿Cuántos empleados hay?}
+\NormalTok{SELECT COUNT(*) AS total\_empleados FROM employee;}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{{-}{-} Ver todos los empleados con su departamento}
+\NormalTok{SELECT e.emp\_id,}
+\NormalTok{       e.fname || \textquotesingle{} \textquotesingle{} || e.lname AS nombre,}
+\NormalTok{       e.title,}
+\NormalTok{       d.name AS departamento}
+\NormalTok{FROM employee e}
+\NormalTok{JOIN department d ON e.dept\_id = d.dept\_id}
+\NormalTok{ORDER BY e.emp\_id;}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{{-}{-} Cuentas activas con saldo disponible}
+\NormalTok{SELECT a.account\_id,}
+\NormalTok{       i.fname || \textquotesingle{} \textquotesingle{} || i.lname AS cliente,}
+\NormalTok{       a.product\_cd AS tipo,}
+\NormalTok{       a.avail\_balance AS saldo}
+\NormalTok{FROM account a}
+\NormalTok{JOIN customer c ON a.cust\_id = c.cust\_id}
+\NormalTok{JOIN individual i ON c.cust\_id = i.cust\_id}
+\NormalTok{WHERE a.status = \textquotesingle{}ACTIVE\textquotesingle{}}
+\NormalTok{ORDER BY a.avail\_balance DESC;}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{{-}{-} Resumen de saldos por tipo de producto}
+\NormalTok{SELECT product\_cd,}
+\NormalTok{       COUNT(*)              AS num\_cuentas,}
+\NormalTok{       SUM(avail\_balance)    AS saldo\_total,}
+\NormalTok{       AVG(avail\_balance)    AS saldo\_promedio}
+\NormalTok{FROM account}
+\NormalTok{WHERE status = \textquotesingle{}ACTIVE\textquotesingle{}}
+\NormalTok{GROUP BY product\_cd}
+\NormalTok{ORDER BY saldo\_total DESC;}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{Preguntas y dudas}\label{preguntas-y-dudas-1}
+
+\begin{itemize}
+\item
+  ¿Por qué \texttt{individual} y \texttt{business} son tablas separadas de \texttt{customer}? → Herencia de tabla: \texttt{customer} tiene los campos comunes, las subclases tienen los específicos. Patrón común en modelado relacional.
+\item
+  ¿Qué es \texttt{pending\_balance} vs \texttt{avail\_balance}? → \texttt{avail\_balance}: saldo disponible ahora. → \texttt{pending\_balance}: incluye transacciones no liquidadas aún.
+\end{itemize}

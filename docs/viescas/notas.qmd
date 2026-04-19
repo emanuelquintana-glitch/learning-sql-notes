@@ -1,6 +1,6 @@
 ---
 title: "SQL Queries for Mere Mortals — Viescas (2018)"
-date: "2026-04-18"
+date: "2026-04-19"
 format:
   html:
     toc: true
