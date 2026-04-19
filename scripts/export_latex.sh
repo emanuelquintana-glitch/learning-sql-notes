@@ -26,5 +26,5 @@ export_org_to_tex() {
 echo "=== Exportando org → LaTeX ==="
 export_org_to_tex "$BEAULIEU_ORG"  "$REPO/latex/beaulieu/notas.tex"
 export_org_to_tex "$VIESCAS_ORG"   "$REPO/latex/viescas/notas.tex"
-export_org_to_tex "$ORSEG_DIR/using-sqlite-small-fast-reliable-choose-any-three.org" "$REPO/latex/kreibich/notas.tex"
+export_org_to_tex "$ORG_DIR/using-sqlite-small-fast-reliable-choose-any-three.org" "$REPO/latex/kreibich/notas.tex"
 echo "=== Export LaTeX completo ==="
