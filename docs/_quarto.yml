@@ -5,21 +5,36 @@ project:
 book:
   title: "Learning SQL Notes"
   author: "Emanuel Quintana"
+  date: "2026-04-19"
+  repo-url: https://github.com/emanuelquintana-glitch/learning-sql-notes
+  repo-actions: [edit, issue]
   chapters:
     - index.qmd
-    - part: "Learning SQL (Beaulieu)"
+    - part: "Learning SQL (Beaulieu 2020)"
       chapters:
         - beaulieu/notas.qmd
-    - part: "SQL Queries for Mere Mortals (Viescas)"
+    - part: "SQL Queries for Mere Mortals (Viescas 2018)"
       chapters:
         - viescas/notas.qmd
-    - part: "Using SQLite (Kreibich)"
+    - part: "Using SQLite (Kreibich 2010)"
       chapters:
         - kreibich/notas.qmd
+
+  suppress-bibliography: false
 
 format:
   html:
     theme: cosmo
     toc: true
+    toc-depth: 3
+    number-sections: true
+    highlight-style: github
+    code-copy: true
   pdf:
     documentclass: scrbook
+    papersize: letter
+    toc: true
+    number-sections: true
+
+execute:
+  warning: false

@@ -1,146 +1,147 @@
-.PHONY: help setup install databases start stop test lint format docs clean
+# ============================================================
+# Makefile — learning-sql-notes
+# Emanuel Quintana · 2026
+#
+# Uso rápido:
+#   make sync       → exportar org → qmd
+#   make render     → renderizar el libro Quarto
+#   make publish    → sync + render + push a gh-pages
+#   make watch      → watcher automático (inotifywait)
+#   make watch-bg   → watcher en background
+#   make stop-watch → detener el watcher
+#   make db-init    → inicializar la base de datos bancaria
+#   make db-reset   → borrar y recrear la BD
+#   make status     → estado del proyecto
+# ============================================================
 
-# Variables
-DOCKER_COMPOSE := docker-compose
-PYTHON := python3
-NPM := npm
-QUARTO := quarto
+SHELL := /bin/bash
+.DEFAULT_GOAL := help
 
-# Colores
-GREEN := \\033[0;32m
-YELLOW := \\033[1;33m
-RED := \\033[0;31m
-NC := \\033[0m
+REPO_ROOT := $(shell pwd)
+DOCS_DIR  := $(REPO_ROOT)/docs
+DB        := $(REPO_ROOT)/databases/practice/bank.duckdb
+SCHEMA    := $(REPO_ROOT)/src/sql/beaulieu/01/bank_schema_duckdb.sql
 
+# ── Colores ────────────────────────────────────────────────
+BOLD  := \033[1m
+RESET := \033[0m
+GREEN := \033[32m
+BLUE  := \033[34m
+CYAN  := \033[36m
+
+.PHONY: help sync render publish watch watch-bg stop-watch \
+        db-init db-reset db-query status clean
+
+# ── Ayuda ──────────────────────────────────────────────────
 help:
 	@echo ""
-	@echo "$(YELLOW)Learning SQL Notes - Makefile$(NC)"
-	@echo "$(YELLOW)================================$(NC)"
+	@echo "$(BOLD)learning-sql-notes$(RESET) — comandos disponibles:"
 	@echo ""
-	@echo "$(GREEN)Comandos disponibles:$(NC)"
+	@echo "  $(CYAN)Notas y documentación$(RESET)"
+	@echo "  $(GREEN)make sync$(RESET)        Exportar org-roam → qmd (una vez)"
+	@echo "  $(GREEN)make render$(RESET)      Renderizar libro Quarto localmente"
+	@echo "  $(GREEN)make publish$(RESET)     sync + render + publicar en gh-pages"
+	@echo "  $(GREEN)make watch$(RESET)       Watcher automático org→qmd (foreground)"
+	@echo "  $(GREEN)make watch-bg$(RESET)    Watcher automático org→qmd (background)"
+	@echo "  $(GREEN)make stop-watch$(RESET)  Detener el watcher en background"
 	@echo ""
-	@echo "  $(YELLOW)Configuración:$(NC)"
-	@echo "    make setup           Configurar entorno de desarrollo completo"
-	@echo "    make install         Instalar dependencias de todos los lenguajes"
+	@echo "  $(CYAN)Base de datos$(RESET)"
+	@echo "  $(GREEN)make db-init$(RESET)     Crear/inicializar banco.duckdb"
+	@echo "  $(GREEN)make db-reset$(RESET)    Borrar y recrear la BD desde cero"
+	@echo "  $(GREEN)make db-query$(RESET)    Abrir REPL DuckDB interactivo"
 	@echo ""
-	@echo "  $(YELLOW)Base de Datos:$(NC)"
-	@echo "    make databases       Iniciar bases de datos (Docker)"
-	@echo "    make start           Iniciar todos los servicios"
-	@echo "    make stop            Detener todos los servicios"
-	@echo "    make db-status       Ver estado de las bases de datos"
-	@echo ""
-	@echo "  $(YELLOW)Desarrollo:$(NC)"
-	@echo "    make test            Ejecutar todos los tests"
-	@echo "    make test-python     Ejecutar tests de Python"
-	@echo "    make test-js         Ejecutar tests de JavaScript"
-	@echo "    make lint            Verificar estilo de código"
-	@echo "    make format          Formatear código automáticamente"
-	@echo ""
-	@echo "  $(YELLOW)Documentación:$(NC)"
-	@echo "    make docs            Generar documentación"
-	@echo "    make serve-docs      Servir documentación localmente"
-	@echo ""
-	@echo "  $(YELLOW)Limpieza:$(NC)"
-	@echo "    make clean           Limpiar archivos generados"
-	@echo "    make clean-docker    Limpiar contenedores Docker"
-	@echo "    make clean-all       Limpiar todo"
+	@echo "  $(CYAN)Utilidades$(RESET)"
+	@echo "  $(GREEN)make status$(RESET)      Estado del proyecto"
+	@echo "  $(GREEN)make clean$(RESET)       Limpiar archivos temporales"
 	@echo ""
 
-setup:
-	@echo "$(YELLOW)Configurando entorno de desarrollo...$(NC)"
-	@echo "$(GREEN)1. Instalando dependencias Python...$(NC)"
-	$(PYTHON) -m pip install --upgrade pip
-	$(PYTHON) -m pip install -e ".[dev,database,docs]"
-	@echo "$(GREEN)2. Instalando dependencias JavaScript...$(NC)"
-	$(NPM) install
-	@echo "$(GREEN)3. Instalando pre-commit hooks...$(NC)"
-	$(PYTHON) -m pip install pre-commit
-	pre-commit install
-	@echo "$(GREEN)✅ Entorno configurado correctamente$(NC)"
+# ── Notas y documentación ──────────────────────────────────
+sync:
+	@echo "$(BOLD)→ Exportando org → qmd...$(RESET)"
+	@bash scripts/sync_org.sh
 
-install:
-	@echo "$(YELLOW)Instalando dependencias...$(NC)"
-	$(PYTHON) -m pip install -r requirements.txt
-	$(NPM) install
-	@echo "$(GREEN)✅ Dependencias instaladas$(NC)"
+render: sync
+	@echo "$(BOLD)→ Renderizando Quarto...$(RESET)"
+	@cd $(DOCS_DIR) && quarto render
 
-databases:
-	@echo "$(YELLOW)Iniciando bases de datos con Docker...$(NC)"
-	$(DOCKER_COMPOSE) up -d mysql postgres adminer sqlite-browser
-	@echo "$(GREEN)✅ Bases de datos iniciadas$(NC)"
-	@echo "$(YELLOW)📊 Adminer: http://localhost:8080$(NC)"
-	@echo "$(YELLOW)🐬 MySQL: localhost:3306$(NC)"
-	@echo "$(YELLOW)🐘 PostgreSQL: localhost:5432$(NC)"
+publish: sync
+	@echo "$(BOLD)→ Publicando en gh-pages...$(RESET)"
+	@cd $(DOCS_DIR) && quarto publish gh-pages --no-prompt
 
-start: databases
-	@echo "$(GREEN)✅ Todos los servicios iniciados$(NC)"
+watch:
+	@echo "$(BOLD)→ Iniciando watcher (Ctrl+C para detener)...$(RESET)"
+	@bash scripts/watch_and_export.sh
 
-stop:
-	@echo "$(YELLOW)Deteniendo servicios...$(NC)"
-	$(DOCKER_COMPOSE) down
-	@echo "$(GREEN)✅ Servicios detenidos$(NC)"
+watch-bg:
+	@echo "$(BOLD)→ Iniciando watcher en background...$(RESET)"
+	@bash scripts/watch_and_export.sh --daemon
+	@echo "  Log: scripts/watcher.log"
 
-db-status:
-	@echo "$(YELLOW)Estado de los contenedores:$(NC)"
-	$(DOCKER_COMPOSE) ps
+stop-watch:
+	@if [ -f /tmp/sql-notes-watcher.pid ]; then \
+	    kill $$(cat /tmp/sql-notes-watcher.pid) 2>/dev/null && \
+	    echo "$(GREEN)✓ Watcher detenido$(RESET)" || \
+	    echo "  (ya estaba detenido)"; \
+	    rm -f /tmp/sql-notes-watcher.pid; \
+	else \
+	    echo "  No hay watcher activo"; \
+	fi
 
-test:
-	@echo "$(YELLOW)Ejecutando tests...$(NC)"
-	@echo "$(GREEN)1. Tests Python:$(NC)"
-	$(PYTHON) -m pytest tests/ -v --cov=src --cov-report=term-missing
-	@echo "$(GREEN)2. Tests JavaScript:$(NC)"
-	cd src/javascript && $(NPM) test
+# ── Base de datos ──────────────────────────────────────────
+db-init:
+	@echo "$(BOLD)→ Inicializando banco.duckdb...$(RESET)"
+	@bash scripts/init_bank.sh
 
-test-python:
-	$(PYTHON) -m pytest tests/ -v
+db-reset:
+	@echo "$(BOLD)→ Recreando BD desde cero...$(RESET)"
+	@rm -f $(DB)
+	@bash scripts/init_bank.sh
 
-test-js:
-	cd src/javascript && $(NPM) test
+db-query:
+	@echo "$(BOLD)→ Abriendo DuckDB REPL...$(RESET)"
+	@duckdb $(DB)
 
-lint:
-	@echo "$(YELLOW)Verificando estilo de código...$(NC)"
-	@echo "$(GREEN)1. Python (flake8):$(NC)"
-	$(PYTHON) -m flake8 src/ tests/
-	@echo "$(GREEN)2. Python (black check):$(NC)"
-	$(PYTHON) -m black --check src/ tests/
-	@echo "$(GREEN)3. JavaScript (eslint):$(NC)"
-	cd src/javascript && $(NPM) run lint
-
-format:
-	@echo "$(YELLOW)Formateando código...$(NC)"
-	@echo "$(GREEN)1. Python (black):$(NC)"
-	$(PYTHON) -m black src/ tests/
-	@echo "$(GREEN)2. Python (isort):$(NC)"
-	$(PYTHON) -m isort src/ tests/
-	@echo "$(GREEN)3. JavaScript (prettier):$(NC)"
-	cd src/javascript && $(NPM) run format
-
-docs:
-	@echo "$(YELLOW)Generando documentación...$(NC)"
-	$(QUARTO) render docs/ --to html
-	@echo "$(GREEN)✅ Documentación generada en docs/_site/$(NC)"
-
-serve-docs:
-	@echo "$(YELLOW)Sirviendo documentación en http://localhost:8088...$(NC)"
-	$(QUARTO) preview docs/ --port 8088
+# ── Utilidades ─────────────────────────────────────────────
+status:
+	@echo ""
+	@echo "$(BOLD)Estado del proyecto$(RESET)"
+	@echo "──────────────────────────────"
+	@echo ""
+	@echo "$(CYAN)Symlinks org-roam:$(RESET)"
+	@for f in org/*.org; do \
+	    if [ -L "$$f" ] && [ -e "$$f" ]; then \
+	        echo "  $(GREEN)✓$(RESET) $$f → $$(readlink $$f)"; \
+	    elif [ -L "$$f" ]; then \
+	        echo "  ✗ $$f → ROTO ($$(readlink $$f))"; \
+	    fi; \
+	done
+	@echo ""
+	@echo "$(CYAN)Base de datos:$(RESET)"
+	@if [ -f "$(DB)" ]; then \
+	    size=$$(du -sh $(DB) | cut -f1); \
+	    echo "  $(GREEN)✓$(RESET) $(DB) ($$size)"; \
+	    duckdb $(DB) "SELECT table_name, estimated_size AS filas FROM duckdb_tables() ORDER BY table_name;" 2>/dev/null || true; \
+	else \
+	    echo "  ✗ BD no inicializada — ejecuta: make db-init"; \
+	fi
+	@echo ""
+	@echo "$(CYAN)Archivos qmd generados:$(RESET)"
+	@find docs -name "*.qmd" | sort | while read f; do \
+	    echo "  ✓ $$f"; \
+	done
+	@echo ""
+	@echo "$(CYAN)Watcher:$(RESET)"
+	@if [ -f /tmp/sql-notes-watcher.pid ] && kill -0 $$(cat /tmp/sql-notes-watcher.pid) 2>/dev/null; then \
+	    echo "  $(GREEN)✓$(RESET) Activo (PID: $$(cat /tmp/sql-notes-watcher.pid))"; \
+	    echo "  Log: scripts/watcher.log"; \
+	else \
+	    echo "  Inactivo — ejecuta: make watch-bg"; \
+	fi
+	@echo ""
 
 clean:
-	@echo "$(YELLOW)Limpiando archivos generados...$(NC)"
-	find . -type f -name "*.pyc" -delete
-	find . -type d -name "__pycache__" -delete
-	find . -type f -name "*.log" -delete
-	find . -type f -name "*.aux" -delete
-	find . -type f -name "*.out" -delete
-	find . -type f -name "*.toc" -delete
-	find . -type f -name "*.synctex.gz" -delete
-	rm -rf build/ dist/ *.egg-info/ .pytest_cache/ .coverage htmlcov/
-	@echo "$(GREEN)✅ Limpieza completada$(NC)"
-
-clean-docker:
-	@echo "$(YELLOW)Limpiando contenedores Docker...$(NC)"
-	$(DOCKER_COMPOSE) down -v --remove-orphans
-	@echo "$(GREEN)✅ Contenedores limpiados$(NC)"
-
-clean-all: clean clean-docker
-	@echo "$(GREEN)✅ Limpieza completa$(NC)"
-
+	@echo "$(BOLD)→ Limpiando archivos temporales...$(RESET)"
+	@rm -f scripts/watcher.log
+	@rm -rf docs/_site
+	@find . -name "*.aux" -o -name "*.log" -o -name "*.out" | xargs rm -f 2>/dev/null || true
+	@echo "$(GREEN)✓ Limpio$(RESET)"

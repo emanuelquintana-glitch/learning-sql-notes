@@ -1,0 +1,9 @@
+
+[13:32:39] === SQL Notes Watcher iniciado ===
+[13:32:39] === Exportación inicial ===
+[13:32:40] ✓ exportado: using-sqlite-small-fast-reliable-choose-any-three.org → notas.qmd
+[13:32:40] ✓ exportado: sql-queries-for-mere-mortals-pearson-ucertify-course-access.org → notas.qmd
+[13:32:40] ✓ exportado: learning-sql-generate-manipulate-and-retrieve-data.org → notas.qmd
+[13:32:40] ✓ _quarto.yml actualizado
+[13:32:40] === Exportación inicial completa ===
+[13:32:40] Observando /home/emanuel/org/libros/Lenguajes_de_Programacion ...
