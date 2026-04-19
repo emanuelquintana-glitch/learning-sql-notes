@@ -1,0 +1,91 @@
+---
+title: "Learning SQL — Beaulieu (2020)"
+date: "2026-04-18"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+  pdf:
+    toc: true
+---
+
+```{=org}
+#+CATEGORY: Lenguajes de Programacion
+```
+```{=org}
+#+FILETAGS: :libro:lenguajes_de_programacion:
+```
+```{=org}
+#+ROAM_ALIASES: "Learning SQL_ Generate, Manipulate, and Retrieve Data"
+```
+# Metadatos {#metadatos tipo="libro"}
+
+  Campo       Valor
+  ----------- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Título      Learning SQL\_ Generate, Manipulate, and Retrieve Data
+  Autor       Alan Beaulieu
+  Año         2020
+  Editorial   O\'Reilly Media, Incorporated
+  Categoría   Lenguajes de Programacion
+  Iniciado    2026-04-18
+  Archivo     [PDF](file:///home/emanuel/Biblioteca/cursos_mit/Electrical Engineering and Computer Science (Course 6)/02_Programming_Languages/Learning SQL_ Generate, Manipulate, and Retrieve Data -- Alan Beaulieu -- 2020 -- O'Reilly Media, Incorporated -- 9781492057611 -- 089bb3c2d0f555be4c292251f45c4863 -- Anna’s Archive.pdf)
+
+# Resumen ejecutivo
+
+# Por qué lo leo / Objetivo de lectura
+
+# Ideas principales
+
+## Idea 1
+
+## Idea 2
+
+## Idea 3
+
+# Notas por capítulo
+
+## Capítulo 1
+
+### Resumen
+
+### Conceptos clave
+
+### Preguntas y dudas
+
+# Citas y fragmentos destacados
+
+# Vocabulario técnico nuevo
+
+  Término   Definición   Página
+  --------- ------------ --------
+                         
+
+# Ejercicios y problemas resueltos
+
+# Código relevante
+
+``` {.python results="output"}
+# Ejemplo del libro
+```
+
+# Conexiones con otros libros/conceptos
+
+# Aplicaciones prácticas
+
+# Valoración final
+
+Dificultad
+:   \[ \] Fácil \[ \] Medio \[ \] Difícil \[ \] Muy difícil
+
+Utilidad
+:   \[ \] Baja \[ \] Media \[ \] Alta \[ \] Esencial
+
+Recomendaría
+:   \[ \] Sí \[ \] No \[ \] Con reservas
+
+Releer
+:   \[ \] Sí \[ \] No
+
+## Opinión personal
+
+# Anotaciones del PDF

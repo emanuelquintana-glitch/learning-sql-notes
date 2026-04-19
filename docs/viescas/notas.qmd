@@ -1,0 +1,91 @@
+---
+title: "SQL Queries for Mere Mortals — Viescas (2018)"
+date: "2026-04-18"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+  pdf:
+    toc: true
+---
+
+```{=org}
+#+CATEGORY: Lenguajes de Programacion
+```
+```{=org}
+#+FILETAGS: :libro:lenguajes_de_programacion:
+```
+```{=org}
+#+ROAM_ALIASES: "SQL Queries for Mere Mortals Pearson UCertify Course Access"
+```
+# Metadatos {#metadatos tipo="libro"}
+
+  Campo       Valor
+  ----------- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Título      SQL Queries for Mere Mortals Pearson UCertify Course Access
+  Autor       John L\_ Viescas
+  Año         2018
+  Editorial   Addison-Wesley Professional
+  Categoría   Lenguajes de Programacion
+  Iniciado    2026-04-18
+  Archivo     [PDF](file:///home/emanuel/Biblioteca/cursos_mit/Electrical Engineering and Computer Science (Course 6)/02_Programming_Languages/SQL Queries for Mere Mortals Pearson UCertify Course Access -- John L_ Viescas -- For Mere Mortals, 4, 2018 -- Addison-Wesley Professional -- 9780134858333 -- d4bbc8ce47bf01b1db74daf5e4bc9a89 -- Anna’s Archive.pdf)
+
+# Resumen ejecutivo
+
+# Por qué lo leo / Objetivo de lectura
+
+# Ideas principales
+
+## Idea 1
+
+## Idea 2
+
+## Idea 3
+
+# Notas por capítulo
+
+## Capítulo 1
+
+### Resumen
+
+### Conceptos clave
+
+### Preguntas y dudas
+
+# Citas y fragmentos destacados
+
+# Vocabulario técnico nuevo
+
+  Término   Definición   Página
+  --------- ------------ --------
+                         
+
+# Ejercicios y problemas resueltos
+
+# Código relevante
+
+``` {.python results="output"}
+# Ejemplo del libro
+```
+
+# Conexiones con otros libros/conceptos
+
+# Aplicaciones prácticas
+
+# Valoración final
+
+Dificultad
+:   \[ \] Fácil \[ \] Medio \[ \] Difícil \[ \] Muy difícil
+
+Utilidad
+:   \[ \] Baja \[ \] Media \[ \] Alta \[ \] Esencial
+
+Recomendaría
+:   \[ \] Sí \[ \] No \[ \] Con reservas
+
+Releer
+:   \[ \] Sí \[ \] No
+
+## Opinión personal
+
+# Anotaciones del PDF
