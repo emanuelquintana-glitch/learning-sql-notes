@@ -170,735 +170,290 @@ Tanto los sistemas de bases de datos jerárquicos como los sistemas de bases de 
 
 En 1970, el Dr. E. F. Codd del laboratorio de investigacion de IBM publico un articulo titulado "A relational Model of Data for Large Share Data Banks" que propuso que los datos se representaran como conjuntos de tablas. En lugar de utilizar punteros para navegar entre entidades relacionadas, se utilizan datos redundantes para vincular registros en diferentes tablas.
 
-** Recuento Historico
 
-# Notas de Estudio: Un Modelo Relacional de Datos para Grandes Bancos de Datos Compartidos (E.F. Codd, 1970)
-
-## 1. Desglose Conceptual Profundo
-
-**Conceptos Centrales:**
-
-*   **Independencia de Datos (Data Independence):** Es la premisa fundamental. Se define como la capacidad de los programas de aplicación y las actividades de los terminales para permanecer inalterados frente a cambios en la representación interna de los datos (física) e incluso en ciertos aspectos de la representación externa (lógica).
-    *   *Intuición:* La separación estricta entre "qué datos existen" y "cómo se almacenan". El usuario interactúa con una abstracción lógica, no con direcciones de memoria o estructuras de punteros.
-*   **Modelo Relacional vs. Modelo de Red/Árbol:** Codd argumenta que los modelos existentes (jerárquicos o de red) imponen una estructura artificial de acceso (punteros, caminos de acceso) que viola la independencia. El modelo relacional, basado en la teoría de conjuntos y relaciones $n$-arias, describe los datos solo con su "estructura natural".
-*   **Relación $n$-aria:** Una tabla plana donde cada fila es una tupla y cada columna es un atributo. No hay anidamiento ni punteros explícitos entre registros.
-*   **Orden, Indexación y Caminos de Acceso Dependientes:**
-    *   *Dependencia de Orden:* La suposición de que los datos se presentan en un orden físico específico (ej. ordenado por ID).
-    *   *Dependencia de Indexación:* La necesidad de conocer índices específicos para recuperar datos eficientemente.
-    *   *Dependencia de Camino de Acceso:* La necesidad de navegar explícitamente a través de una red de punteros (como en el modelo CODASYL) para encontrar datos relacionados.
-
-**Supuestos (Axiomas) Fundamentales:**
-
-1.  **El usuario no debe conocer la implementación física:** Cualquier servicio que exponga detalles de almacenamiento es insuficiente.
-2.  **La estructura natural de los datos es plana:** Las relaciones de datos pueden representarse adecuadamente sin superponer estructuras de control de flujo o navegación.
-3.  **La teoría de relaciones es suficiente:** La lógica de primer orden y la teoría de conjuntos proveen el marco matemático necesario para modelar consultas y actualizaciones sin recurrir a procedimientos imperativos de acceso.
-
-## 2. Formalización Algebraica y Matemática
-
-Aunque el texto proporcionado es introductorio y define el problema, el modelo se formaliza matemáticamente de la siguiente manera (inferencia del modelo completo basado en la teoría de relaciones mencionada):
-
-**Definiciones:**
-
-*   Sea $D_1, D_2, \dots, D_n$ un conjunto de dominios (dominios de valores atómicos).
-*   Una **Relación** $R$ es un subconjunto del producto cartesiano de estos dominios:
-    $$ R \subseteq D_1 \times D_2 \times \dots \times D_n $$
-*   Una **Tupla** $t$ es un elemento de $R$, representado como una lista ordenada de valores: $t = (a_1, a_2, \dots, a_n)$ donde $a_i \in D_i$.
-*   Un **Esquema de Relación** se define como $R(A_1, A_2, \dots, A_n)$, donde $A_i$ son los nombres de los atributos correspondientes a los dominios $D_i$.
-
-**Operaciones del Álgebra Relacional (Inferidas para resolver la "Independencia"):**
-
-Para manipular datos sin dependencias de camino, se define un conjunto de operaciones cerradas sobre relaciones:
-
-1.  **Selección ($\sigma$):** Filtra tuplas que satisfacen un predicado $P$.
-    $$ \sigma_P(R) = \{ t \mid t \in R \land P(t) \} $$
-2.  **Proyección ($\pi$):** Selecciona columnas específicas, eliminando duplicados.
-    $$ \pi_{A_1, \dots, A_k}(R) = \{ t[A_1, \dots, A_k] \mid t \in R \} $$
-3.  **Unión ($\cup$), Intersección ($\cap$), Diferencia ($-$):** Operaciones estándar de teoría de conjuntos (requieren esquemas compatibles).
-4.  **Producto Cartesiano ($\times$):** Combina todas las tuplas de dos relaciones.
-    $$ R_1 \times R_2 = \{ (t_1, t_2) \mid t_1 \in R_1 \land t_2 \in R_2 \} $$
-5.  **Join ($\bowtie$):** La operación crítica para reemplazar punteros. Une relaciones basándose en valores coincidentes en atributos comunes, eliminando la necesidad de navegación física.
-    $$ R_1 \bowtie_{condition} R_2 = \sigma_{condition}(R_1 \times R_2) $$
-
-**Modelo de Optimización (La "Trampa de Conexión"):**
-
-En modelos de red, la eficiencia depende de la ruta $P$. En el modelo relacional, la eficiencia es una responsabilidad del sistema de gestión (SGBD), no del usuario.
-*   *Problema de Red:* $Result = Navigate(Root \to P_1 \to P_2 \dots \to Target)$
-*   *Solución Relacional:* $Result = \pi_{attrs}(R_1 \bowtie R_2 \bowtie \dots \bowtie R_k)$
-La optimización del camino se traslada al interior del motor, preservando la independencia del usuario.
-
-## 3. Análisis Crítico y Derivaciones
-
-**Consistencia Lógica Interna:**
-
-El argumento de Codd es elegante en su simplicidad:
-1.  Los sistemas actuales atan la lógica de negocio a la estructura de almacenamiento (punteros/índices).
-2.  El almacenamiento físico es mutable y optimizable; la lógica de negocio debe ser estable.
-3.  Por tanto, la interfaz de datos debe ser matemáticamente independiente de la implementación física.
-4.  La teoría de relaciones provee esta independencia porque los conjuntos y sus operaciones son abstractos por definición.
-
-**Implicaciones de los Resultados:**
-
-*   **Eliminación de la "Trampa de Conexión" (Connection Trap):** En modelos de red, si la estructura de conexiones cambia (ej. un nuevo tipo de relación), los programas que navegan esos caminos deben reescribirse. En el modelo relacional, mientras la semántica de los datos (qué datos existen) no cambie, el usuario no nota cambios en la organización.
-*   **Redundancia y Consistencia:** El modelo permite definir formalmente qué datos son redundantes y cómo mantener la consistencia a través de restricciones basadas en la teoría (llaves candidatas, claves foráneas), en lugar de depender de la integridad referencial mantenida por punteros físicos que pueden romperse.
-
-**Limitaciones y Contraejemplos Teóricos (Perspectiva Histórica):**
-
-*   **Costo Computacional Inicial:** En 1970, la abstracción relacional era vista como ineficiente comparada con la navegación directa de punteros. La promesa de Codd era que el SGBD podría optimizar las consultas (transformar álgebra en caminos físicos eficientes) mejor que cualquier programador humano.
-*   **Complejidad de la Implementación:** El texto admite que "las implementaciones de sistemas... no se discuten". La teoría era sólida, pero la ingeniería para crear un optimizador de consultas capaz de igualar el rendimiento de la navegación manual fue un desafío monumental que tomó décadas.
-*   **Datos No Estructurados:** El modelo asume datos atómicos y tabulares. No abordaba nativamente datos complejos, jerárquicos profundos o no estructurados (aunque esto se resolvió más tarde con XML/JSON o modelos NoSQL, que a menudo reintroducen problemas de independencia).
-
-## 4. Síntesis Rigurosa
-
-El artículo de Codd establece un cambio de paradigma fundamental: el paso de la **gestión de datos basada en navegación** (imperativa, dependiente de la estructura física) a la **gestión de datos basada en declaraciones** (declarativa, dependiente de la lógica matemática).
-
-La intuición económica y lógica subyacente es la **desacoplamiento**. Al formalizar los datos como relaciones $n$-arias y las operaciones como un álgebra cerrada, se elimina la fricción entre la evolución de los requisitos de datos y la estabilidad del software. La formalización matemática no es solo una herramienta de descripción, sino el mecanismo de protección que garantiza que los cambios en la infraestructura de hardware o en los índices de acceso sean transparentes para el usuario final.
-
-La "estructura natural" de los datos es, en última instancia, la estructura lógica que el usuario entiende, no la estructura física que la máquina utiliza. El modelo relacional es la única arquitectura propuesta hasta la fecha que cumple rigurosamente con este axioma de independencia, sentando las bases para la universalidad de los lenguajes de consulta (como SQL, derivado de este trabajo) y la longevidad de los sistemas de gestión de bases de datos modernos.
-
-El argumento central de Codd postula una distinción ontológica irreductible entre el "orden de presentación" (la vista lógica y semántica de los datos para el usuario) y el "orden almacenado" (la implementación física en disco). Los sistemas de la época, como IMS y IDS, fallaban al no distinguir estos niveles, permitiendo que la lógica de las aplicaciones se acoplara a estructuras físicas específicas (punteros, cadenas, árboles). Codd demuestra lógicamente que si un programa depende de una ruta de acceso específica (ej. navegar de "Partes" a "Proyectos" a través de un árbol anidado), cualquier reorganización física o cambio en la estructura de la base de datos (como cambiar a una vista donde "Proyectos" sean los padres) invalida inmediatamente el programa.
-
-La lógica del autor se reconstruye en tres pasos:
-
-Inmutabilidad Falsa: Los sistemas actuales asumen que la estructura física (árboles o redes) es estática y que los programas pueden aprovecharla para el rendimiento.
-Fragilidad de la Dependencia: Cualquier cambio en la estructura de almacenamiento (necesario para optimizar nuevas consultas o manejar crecimiento) obliga a reescribir los programas, ya que estos no operan sobre la información en sí, sino sobre la ruta de acceso a ella.
-Necesidad de Independencia: Se requiere un modelo donde la estructura lógica sea independiente de la física, permitiendo que los índices y rutas se creen o destruyan sin afectar la validez de las consultas de alto nivel.
-El contexto teórico es la transición de los sistemas de archivos y bases de datos jerárquicas hacia el modelo relacional. El objetivo es demostrar la insuficiencia de los modelos de punteros y jerarquías para soportar entornos de datos compartidos y cambiantes, sentando las bases para la independencia de datos que define el modelo relacional.
-
-** Citas y Evidencia Textual Clave
-
-#+BEGIN_QUOTE Stored ordering. Those application programs which take advantage of the stored ordering of a file are likely to fail to operate correctly if for some reason it becomes necessary to replace that ordering by a different one. #+END_QUOTE Justificación: Establece el axioma fundamental: la dependencia del orden físico hace que el software sea frágil ante cambios de implementación.
-
-#+BEGIN_QUOTE It is unnecessary to single out any system as an example, because all the well-known information systems that are marketed today fail to make a clear distinction between order of presentation on the one hand and stored ordering on the other. #+END_QUOTE Justificación: Generaliza el problema como un fallo sistémico de la industria de 1970 (IMS, IDS, etc.), no como un error aislado.
-
-#+BEGIN_QUOTE From an informational standpoint, an index is a redundant component of the data representation. ... Can application programs and terminal activities remain invariant as indices come and go? #+END_QUOTE Justificación: Define la naturaleza redundante de los índices y plantea el problema de la independencia de la indexación, crucial para la flexibilidad del sistema.
-
-#+BEGIN_QUOTE Application programs taking advantage of the performance benefit of these indexing chains must refer to those chains by name. Such programs do not operate correctly if these chains are later removed. #+END_QUOTE Justificación: Ilustra el acoplamiento directo en sistemas como IDS, donde el nombre de la estructura física (la cadena) se convierte en parte de la lógica de la aplicación.
-
-#+BEGIN_QUOTE Application programs developed to work with these systems tend to be logically impaired if the trees or networks are changed in structure. #+END_QUOTE Justificación: La tesis central de la "Dependencia de la Ruta de Acceso": la estructura lógica está atrapada dentro de la estructura física.
-
-** Desglose de Conceptos y Formalización Matemática
-
-*** Conceptos Técnicos
-
-Stored Ordering (Orden Almacenado): La secuencia física de registros en el medio de almacenamiento. En los sistemas antiguos, esto determinaba la relación lógica entre datos.
-Order of Presentation (Orden de Presentación): La secuencia lógica o semántica en la que los datos son interpretados por la aplicación o el usuario, independiente de su ubicación física.
-Indexing Dependence (Dependencia de Indexación): La condición en la que la corrección de un programa depende de la existencia, nombre o estructura específica de un índice físico.
-Access Path Dependence (Dependencia de Ruta de Acceso): La situación donde la lógica de navegación de los datos (cómo se llega de A a B) está codificada en el programa basada en una estructura de árbol o red específica.
-Hierarchic/Network Model (Modelo Jerárquico/Red): Estructuras de datos donde los registros están conectados explícitamente mediante punteros o cadenas, formando árboles o grafos dirigidos.
-*** Formalización Matemática y Lógica
-
-Aunque el texto es descriptivo, la estructura lógica de la dependencia se puede modelar algebraicamente.
-
-Definamos:
-
-$D$: El conjunto de datos (información semántica).
-$S$: La estructura física de almacenamiento (árboles, redes, orden de disco).
-$P$: El programa de aplicación.
-$I$: El conjunto de índices disponibles.
-$f_{view}$: La función de vista que mapea datos físicos a lógica.
-En un sistema ideal (Relacional), la independencia de datos implica: $$ P(D) \text{ es independiente de } S \text{ y } I $$ $$ \forall s \in S, \forall i \in I: \text{Validez}(P) = \text{constante} $$
-
-En los sistemas criticados por Codd (Jerárquicos/Red), el programa $P$ depende explícitamente de una ruta de acceso específica $R$ dentro de la estructura $S$: $$ P = f(D, R_S) $$ Donde $R_S$ es la ruta de navegación definida por la estructura física $S$.
-
-Si la estructura cambia de $S_1$ a $S_2$ (ej. cambiar de "Partes subordinadas a Proyectos" a "Proyectos subordinados a Partes"), la ruta $R_{S_1}$ deja de existir o cambia de significado: $$ S_1 \xrightarrow{\text{cambio}} S_2 \implies R_{S_1} \neq R_{S_2} $$ $$ \therefore P(D, R_{S_1}) \text{ falla si se ejecuta sobre } S_2 $$
-
-Modelización de las Estructuras (Ejemplo de Partes y Proyectos): Sean $Part$ y $Project$ como conjuntos de entidades. Sea $Commitment$ la relación entre ellas.
-
-En el Modelo Jerárquico (Estructura 1 del texto), la estructura física impone una relación de padre-hijo: $$ Structure_1 = { (p, {pr}) \mid p \in Part, pr \in Project } $$ Aquí, navegar de $Part$ a $Project$ es una operación de "hijo" directa. Si cambiamos a Estructura 2 ($Project$ como padre): $$ Structure_2 = { (pr, {p}) \mid pr \in Project, p \in Part } $$ La función de acceso del programa $Access(Part \to Project)$ definida para $Structure_1$ requiere un puntero descendente. En $Structure_2$, ese puntero no existe en la misma dirección, requiriendo una búsqueda inversa o un cambio de código.
-
-La formalización del problema de independencia se puede expresar como la búsqueda de una función de mapeo $\phi$ tal que: $$ \forall \sigma \in \Sigma \text{ (estructuras físicas)}, \exists \phi_\sigma: \text{Lógica} \to \sigma $$ Donde la interfaz de la aplicación $A$ interactúa solo con Lógica, y $\phi_\sigma$ es manejado internamente por el SGBD, haciendo que $A$ sea invariante bajo cambios en $\sigma$.
-
-** Importancia y Relevancia Teórica
-
-Este texto es la piedra angular teórica que justifica el surgimiento del modelo relacional. Su importancia radica en:
-
-Fundamentación de la Independencia de Datos: Codd establece por primera vez de manera formal y crítica que la separación entre la lógica de los datos y su almacenamiento no es una optimización, sino un requisito de corrección para sistemas de gran escala. Sin esto, el mantenimiento de software en bases de datos sería imposible a medida que los requisitos de negocio cambian.
-Crítica a los Punteros y Navegación: El análisis demuestra que el uso de punteros físicos y rutas de navegación (cadenas en IDS, árboles en IMS) introduce una fragilidad inherente. Esto justifica el abandono de la navegación explícita a favor de la declaración de qué datos se necesitan (lógica relacional/SQL) en lugar de cómo acceder a ellos.
-Implicaciones Metodológicas: El texto obliga a un cambio de paradigma: de diseñar la base de datos pensando en la eficiencia de acceso inmediato (optimización prematura de rutas) a diseñar la estructura lógica normalizada y permitir que el sistema gestione las rutas de acceso (índices) dinámicamente.
-Solución a Problemas Previos: Resuelve el problema de la "parálisis del esquema", donde las empresas no podían modificar sus estructuras de datos por miedo a romper aplicaciones críticas. El modelo relacional permite añadir índices o reorganizar datos físicamente sin tocar una línea de código de la aplicación.
-Limitaciones y Supuestos:
-El texto asume que el costo computacional de traducir consultas lógicas a rutas físicas eficientes es aceptable (lo cual fue cierto con el tiempo y mejoró con optimizadores), mientras que en 1970 los sistemas jerárquicos eran más rápidos para transacciones simples específicas.
-Asume que los usuarios pueden abstraerse completamente de la física, lo cual a veces es difícil en sistemas de rendimiento extremo donde el conocimiento de la estructura física sigue siendo relevante para la optimización manual.
-
-El texto de la página 380 de Codd constituye el núcleo de la transición del modelo relacional matemático (basado en conjuntos ordenados) al modelo relacional lógico (basado en conjuntos desordenados por nombres). El argumento central es que la dependencia de la posición de los dominios en una relación (ordenamiento implícito) introduce una fragilidad semántica y operativa inaceptable para el usuario final, especialmente en esquemas de alta aridez (grado elevado, como 30).
-
-Codd postula una distinción fundamental entre:
-
-Relación (Mathematical Relation): Un conjunto ordenado de tuplas donde la posición de los atributos es significativa ($A_1, A_2, \dots, A_n$). Cambiar el orden cambia la relación.
-Relación Lógica (User Relationship): Una entidad desordenada donde la identidad de los dominios se define por su nombre de rol (role name), no por su posición.
-La lógica del argumento se construye así:
-
-Premisa 1: En sistemas complejos, el orden de los dominios es arbitrario y difícil de recordar para el usuario.
-Premisa 2: Si el usuario debe depender de la posición (ej. "el tercer campo es el proyecto"), cualquier reordenamiento físico o lógico rompe la semántica de la consulta.
-Conclusión: El usuario debe interactuar con relaciones desordenadas, donde cada dominio está calificado por un nombre de rol único (ej. sub.part, super.part). Esto permite que la estructura de datos sea invariante ante permutaciones de posición.
-El texto introduce también la formalización de conceptos de integridad y referencia:
-
-Dominio Activo: El subconjunto de valores que realmente existen en la base de datos en un instante dado ($ActiveDomain \subseteq Domain$).
-Clave Primaria (Primary Key): Un dominio (o combinación) que identifica únicamente cada tupla. Debe ser no redundante (ningún subconjunto de sus componentes es superfluo).
-Clave Foránea (Foreign Key): Un dominio que referencia la clave primaria de otra relación (o de sí misma), estableciendo la integridad referencial sin necesidad de punteros físicos.
-Dominios No Simples: Permiten que los elementos de un dominio sean ellos mismos relaciones (relaciones anidadas), lo que anticipa la recursividad y la capacidad de manejar datos complejos dentro del marco relacional.
-El objetivo es desvincular la lógica de la implementación, estableciendo que la "identidad" de un atributo es su nombre, no su índice. Esto resuelve el problema de la rigidez de los sistemas jerárquicos y de red, donde la estructura de acceso era fija.
-
-** Citas y Evidencia Textual Clave
-
-#+BEGIN_QUOTE In many commercial, governmental, and scientific data banks, however, some of the relations are of quite high degree (a degree of 30 is not at all uncommon). Users should not normally be burdened with remembering the domain ordering of any relation (for example, the ordering supplier, then part, then project, then quantity in the relation supply). #+END_QUOTE Justificación: Establece la necesidad pragmática de abandonar el ordenamiento de dominios. La complejidad (grado 30) hace inviable la dependencia de la posición.
-
-#+BEGIN_QUOTE Accordingly, we propose that users deal, not with relations which are domain-ordered, but with relationships which are their domain-unordered counterparts. #+END_QUOTE Justificación: La tesis central. Propone el cambio ontológico de "relación matemática" a "relación lógica desordenada".
-
-#+BEGIN_QUOTE To accomplish this, domains must be uniquely identifiable at least within any given relation, without using position. Thus, where there are two or more identical domains, we require in each case that the domain name be qualified by a distinctive role name... #+END_QUOTE Justificación: Define el mecanismo de solución: la calificación por rol (role name) para resolver ambigüedades y eliminar la dependencia de la posición.
-
-#+BEGIN_QUOTE A primary key is nonredundant if it is either a simple domain (not a combination) or a combination such that none of the participating simple domains is superfluous in uniquely identifying each element. #+END_QUOTE Justificación: Define rigurosamente la propiedad de no redundancia en las claves primarias, evitando claves superfluas que no contribuyen a la unicidad.
-
-#+BEGIN_QUOTE A foreign key is not the primary key of R but its elements are values of the primary key of some relation S... #+END_QUOTE Justificación: Formaliza la integridad referencial, definiendo las claves foráneas como puentes lógicos entre relaciones sin necesidad de punteros físicos.
-
-#+BEGIN_QUOTE Nonatomic values can be discussed within the relational framework. Thus, some domains may have relations as elements. #+END_QUOTE Justificación: Expande el modelo relacional más allá de valores atómicos, permitiendo la recursividad y la estructura de datos compleja (relaciones anidadas).
-
-** Desglose de Conceptos y Formalización Matemática
-
-*** Conceptos Técnicos
-
-Dominio Ordenado vs. Desordenado:
-Ordenado: La identidad del atributo depende de su índice $i$ en la tupla.
-Desordenado: La identidad depende de un nombre de rol $n_i$.
-Role Name (Nombre de Rol): Un identificador semántico que califica un dominio para distinguir su función dentro de la relación (ej. supplier_id vs. part_id en una relación de suministro).
-Active Domain (Dominio Activo): El conjunto de valores reales presentes en la base de datos en un momento $t$. $$ ActiveDomain(R, A, t) \subseteq Domain(A) $$
-Primary Key (Clave Primaria): Subconjunto de dominios $K \subseteq {D_1, \dots, D_n}$ tal que para cualquier par de tuplas $t_1, t_2 \in R$, si $t_1[K] = t_2[K]$ entonces $t_1 = t_2$. Debe ser mínimo (no redundante).
-Foreign Key (Clave Foránea): Dominio $F$ en relación $R$ cuyos valores deben coincidir con los valores de una clave primaria $P$ en relación $S$ (o $R$ misma).
-Nonsimple Domain (Dominio No Simple): Un dominio cuyos elementos son conjuntos de valores o relaciones enteras (ej. un historial de salarios es una relación de fechas y montos).
-Repeating Group: (Mención de terminología obsoleta) Grupos de valores repetidos que el modelo relacional busca eliminar en favor de relaciones planas.
-*** Formalización Matemática y Lógica
-
-A. Relaciones Desordenadas (User Relationships)
-
-Sea $R$ una relación de grado $n$. En el modelo matemático tradicional, es un subconjunto de un producto cartesiano ordenado: $$ R \subseteq D_1 \times D_2 \times \dots \times D_n $$ Una tupla $t$ es una secuencia $(v_1, v_2, \dots, v_n)$ donde $v_i \in D_i$.
-
-En el modelo propuesto por Codd, la relación es un conjunto de asociaciones nombre-valor. Definimos una relación como un conjunto de funciones parciales o diccionarios: $$ R = { f \mid f: {N_1, \dots, N_k} \to \bigcup_{i=1}^n D_i, \text{ donde } f(N_i) \in D_i } $$ Donde $N_i$ son los nombres de rol (role names) que identifican los dominios, no sus posiciones. Si hay dominios idénticos (mismo tipo de dato), se requiere calificación: $$ \text{dom}(N_i) = D, \quad \text{dom}(N_j) = D, \quad i \neq j \implies N_i \neq N_j \text{ (por rol)} $$ Ejemplo del texto: component tiene dominios sub.part, super.part, quantity. La tupla $t$ se representa como: $$ t = { (\text{sub.part}, p_1), (\text{super.part}, p_2), (\text{quantity}, q) } $$ El orden de estos pares es irrelevante.
-
-B. Integridad de Claves
-
-Clave Primaria (Primary Key): Sea $K = {A_1, \dots, A_m}$ un subconjunto de atributos de $R$. $$ \forall t_1, t_2 \in R: \left( \forall A_i \in K, t_1[A_i] = t_2[A_i] \right) \implies t_1 = t_2 $$ No Redundancia: $K$ es mínima si para todo $A_j \in K$, el conjunto $K \setminus {A_j}$ no satisface la condición de unicidad.
-
-Clave Foránea (Foreign Key): Sea $F$ un conjunto de atributos en $R$ y $P$ una clave primaria en $S$. $$ \forall t \in R: t[F] \in \pi_F(\sigma_{P=t[P]}(S)) $$ O más simplemente: $$ \pi_F(R) \subseteq \pi_P(S) $$ Esto asegura que cada valor en la clave foránea existe como clave primaria en la relación referenciada.
-
-C. Dominios No Simples y Recursividad
-
-Si un dominio $D_{hist}$ es "no simple", su conjunto de valores son relaciones. Sea $D_{salary_hist} = { r \mid r \subseteq \text{Date} \times \text{Amount} }$. Una tupla en la relación employee puede tener un valor $h \in D_{salary_hist}$: $$ t_{emp} = { (\text{name}, \text{"John"}), (\text{salary_hist}, h) } $$ Donde $h = { (\text{date}_1, \text{amount}_1), (\text{date}_2, \text{amount}_2), \dots }$. Esto formaliza la capacidad de almacenar estructuras de datos complejas dentro de un dominio atómico en el nivel superior, manteniendo la integridad relacional.
-
-D. Dominio Activo
-
-El dominio activo es dinámico: $$ ActiveDomain(R, A, t) = { v \mid \exists t' \in R(t'), t'[A] = v } $$ Contraste con el dominio teórico (todos los valores posibles): $$ ActiveDomain(R, A, t) \subseteq Domain(A) $$
-
-** Importancia y Relevancia Teórica
-
-Este fragmento es crucial porque formaliza la abstracción de datos que permite que el modelo relacional sea usable en la práctica, no solo teóricamente.
-
-Innovación en la Interacción Humano-Máquina: Al proponer la independencia del orden de los dominios, Codd elimina la carga cognitiva de recordar la posición de los atributos. Esto es fundamental para la usabilidad de SQL y los lenguajes declarativos. El usuario dice "elige el nombre", no "elige el tercer campo".
-
-Integridad Referencial sin Punteros: La definición de claves foráneas como valores (no punteros) permite que la integridad de los datos sea una propiedad lógica del conjunto de datos, no una propiedad de la estructura física de acceso. Esto facilita la normalización, la integridad y la portabilidad de los datos.
-
-Generalización del Modelo: La inclusión de dominios no simples y la capacidad de manejar relaciones anidadas amplían el alcance del modelo relacional más allá de tablas planas, anticipando conceptos modernos de bases de datos semirrelacionales y JSON.
-
-Crítica a la Terminología Obsoleta: Al vincular los conceptos de "atributo" y "repeating group" (términos de sistemas jerárquicos) con dominios simples y no simples, Codd proporciona un marco teórico para migrar y reemplazar sistemas antiguos sin perder la semántica.
-
-Implicaciones Metodológicas:
-
-Diseño de Esquemas: Obliga a los diseñadores a pensar en nombres semánticos y roles, no en archivos físicos.
-Optimización: El sistema debe traducir consultas basadas en nombres a rutas de acceso físicas eficientes, un desafío que impulsó el desarrollo de optimizadores de consultas.
-Normalización: La definición rigurosa de claves primarias y foráneas es la base de la teoría de normalización (1NF, 2NF, 3NF, BCNF).
-Limitaciones y Supuestos:
-
-Asume que el sistema de gestión puede manejar eficientemente la sobrecarga de verificar integridad referencial en claves foráneas en tiempo real (un problema de rendimiento que se resolvió con índices y restricciones diferidas).
-Asume que los usuarios pueden abstraerse completamente de la estructura física, lo cual a veces requiere compromisos en sistemas de alto rendimiento específico.
-La formalización de dominios no simples introduce complejidad en la consulta y el procesamiento, lo que eventualmente llevó a la distinción entre modelos relacionales puros y modelos orientados a objetos.
-
-** Explicación Conceptual Detallada
-
-El texto de la página 381 introduce el concepto fundamental de Forma Normal (Normal Form) y el procedimiento de normalización como mecanismo para eliminar dominios no simples (nonsimple domains) y garantizar que toda relación pueda representarse como un arreglo bidimensional homogéneo. Codd argumenta que la complejidad y la confusión en los sistemas de bases de datos de la época surgían de la mezcla entre tipos de datos e instancias, y entre el modelo lógico y la representación física (ej. el uso ambiguo del término "registro").
-
-La lógica del autor se desarrolla en tres etapas:
-
-Identificación del Problema: Los dominios no simples (como un historial de salarios dentro de un registro de empleado) requieren estructuras de datos complejas (punteros, listas anidados) que rompen la simplicidad del modelo relacional y dificultan el almacenamiento y la comunicación de datos.
-Propuesta de Solución (Normalización): Se define un algoritmo sistemático para "desanidar" estas estructuras. El proceso implica tomar la clave primaria de una relación padre e insertarla en cada relación hija subordinada, convirtiendo así los dominios anidados en relaciones independientes y planas.
-Condiciones de Validez: El algoritmo requiere que las relaciones no normalizadas formen un árbol de dependencias y que ninguna clave primaria contenga dominios no simples. Si se cumplen, el resultado es un conjunto de relaciones en forma normal donde cada relación es un conjunto de tuplas atómicas.
-El objetivo teórico es demostrar que cualquier estructura de datos jerárquica o anidada puede ser transformada en un conjunto de relaciones planas sin pérdida de información, eliminando la necesidad de punteros y listas de ordenación. Esto sienta las bases para la independencia de datos física y lógica, permitiendo que la representación de datos sea un simple arreglo bidimensional, ideal para la comunicación entre sistemas heterogéneos y para el almacenamiento eficiente.
-
-Además, el texto anticipa la base lingüística del modelo: al estar en forma normal, el lenguaje de consulta puede basarse en un cálculo de predicados de primer orden, lo que proporciona un marco formal riguroso para la expresión de consultas y restricciones.
-
-** Citas y Evidencia Textual Clave
-
-#+BEGIN_QUOTE Much of the confusion in present terminology is due to failure to distinguish between type and instance (as in "record") and between components of a user model of the data on the one hand and their machine representation counterparts on the other hand. #+END_QUOTE Justificación: Diagnóstico fundamental del problema conceptual de la época: la mezcla de niveles de abstracción (lógico vs. físico) que generaba ambigüedad y fragilidad en los sistemas.
-
-#+BEGIN_QUOTE A relation whose domains are all simple can be represented in storage by a two-dimensional column-homogeneous array... Some more complicated data structure is necessary for a relation with one or more nonsimple domains. #+END_QUOTE Justificación: Establece la motivación técnica para la normalización: la necesidad de estructuras de almacenamiento simples y eficientes (arreglos bidimensionales) que solo son posibles si se eliminan los dominios no simples.
-
-#+BEGIN_QUOTE Normalization proceeds as follows. Starting with the relation at the top of the tree, take its primary key and expand each of the immediately subordinate relations by inserting this primary key domain or domain combination. #+END_QUOTE Justificación: Describe el algoritmo de normalización paso a paso. Es la definición operativa que transforma datos anidados en relaciones planas mediante la propagación de claves primarias.
-
-#+BEGIN_QUOTE The primary key of each expanded relation consists of the primary key before expansion augmented by the primary key copied down from the parent relation. #+END_QUOTE Justificación: Define la regla de expansión de claves, crucial para mantener la integridad referencial y la unicidad en las relaciones resultantes.
-
-#+BEGIN_QUOTE If normalization as described above is to be applicable, the unnormalized collection of relations must satisfy the following conditions: (1) The graph of interrelationships of the nonsimple domains is a collection of trees. (2) No primary key has a component domain which is nonsimple. #+END_QUOTE Justificación: Establece los pre-requisitos formales para que el proceso de normalización sea válido y garantice un resultado libre de anomalías.
-
-#+BEGIN_QUOTE A first-order predicate calculus suffices if the collection of relations is in normal form. Such a language would provide a yardstick of linguistic power for all other proposed data languages. #+END_QUOTE Justificación: Conecta la forma normal con la capacidad expresiva del lenguaje de consulta. La normalización permite el uso de lógica de primer orden como base formal para los lenguajes de datos (precursor de SQL).
-
-** Desglose de Conceptos y Formalización Matemática
-
-*** Conceptos Técnicos
-
-Dominio Simple (Simple Domain): Un dominio cuyos elementos son valores atómicos (no descomponibles) y no contienen estructuras internas.
-Dominio No Simple (Nonsimple Domain): Un dominio cuyos elementos son a su vez relaciones o estructuras de datos complejas (ej. un historial de salarios, una lista de hijos).
-Forma Normal (Normal Form): Una relación donde todos los dominios son simples. No hay atributos anidados ni grupos repetidos.
-Normalización: El proceso algorítmico de transformar una colección de relaciones con dominios no simples en un conjunto de relaciones en forma normal.
-Árbol de Dependencias: La estructura jerárquica que describe cómo los dominios no simples se relacionan entre sí (padre-hijo).
-Cálculo de Predicados de Primer Orden: El sistema lógico formal que basta para expresar todas las consultas necesarias sobre relaciones en forma normal.
-Sublenguaje de Datos (Data Sublanguage): Un lenguaje dedicado (denotado como $R$) basado en lógica de predicados, separado del lenguaje de host ($H$), para manipular relaciones.
-*** Formalización Matemática y Lógica
-
-A. Definición de Normalización
-
-Sea $R$ una relación con un dominio no simple $D_{ns}$. $$ R = { (k, d_1, \dots, d_n, D_{ns}) } $$ Donde $k$ es la clave primaria y $D_{ns}$ es una relación anidada $R'$. El proceso de normalización transforma esto en dos relaciones:
-
-$R_{padre} = { (k, d_1, \dots, d_n) }$
-$R_{hijo} = { (k, k', d'_1, \dots, d'_m) }$ Donde $k'$ es la clave primaria de $R'$, y $k$ se ha insertado en $R'$ como clave foránea, formando una nueva clave compuesta $(k, k')$.
-B. Algoritmo de Expansión de Claves
-
-Sea $P$ la relación padre con clave $K_P$. Sea $C$ la relación hija con clave $K_C$. La relación hija normalizada $C'$ tendrá: $$ K_{C'} = K_P \cup K_C $$ $$ C' = { (k_p, k_c, \text{atributos de } C) \mid \exists t \in C, t[K_C] = k_c \land t[\text{padre}] = k_p } $$ Este proceso se repite recursivamente para cada nivel del árbol de dependencias.
-
-C. Condiciones de Validez
-
-Estructura de Árbol: Sea $G = (V, E)$ el grafo de dependencias de dominios no simples. $$ G \text{ es un bosque (colección de árboles)} \iff \forall v \in V, \text{grado de entrada}(v) \le 1 \land \text{no hay ciclos} $$
-Claves Simples: $$ \forall K \in \text{Keys}(R), \forall d \in K: \text{es_simple}(d) = \text{true} $$
-D. Representación en Forma Normal
-
-Una relación en forma normal $R$ se representa como un arreglo bidimensional: $$ R[i] [j] \in \text{Dom}(A_j) $$ Donde $A_j$ son los atributos (dominios simples). La sintaxis de acceso a datos se simplifica a: $$ \text{Nombre} = R(g).r.d $$ Donde:
-
-$R$: Nombre de la relación.
-$g$: Identificador de generación (opcional).
-$r$: Nombre de rol (opcional, si hay ambigüedad de dominios).
-$d$: Nombre del dominio. Si no hay ambigüedad ni múltiples generaciones: $R.d$.
-E. Lenguaje de Datos basado en Lógica de Primer Orden
-
-El sublenguaje $R$ permite expresiones como: $$ { t \mid R(t) \land P(t) } $$ Donde $P(t)$ es una fórmula en cálculo de predicados de primer orden sobre los atributos de $t$. La capacidad expresiva de $R$ es equivalente a la del álgebra relacional cuando las relaciones están en forma normal.
-
-** Importancia y Relevancia Teórica
-
-Este texto es seminal porque establece los cimientos de la teoría de normalización y la arquitectura de lenguajes de bases de datos.
-
-Fundamento de la Normalización: Codd introduce formalmente el concepto de eliminar dominios no simples para lograr la 1ª Forma Normal (1NF). Esto es crucial para evitar anomalías de inserción, actualización y borrado que surgen de los grupos repetidos y la anidación.
-
-Simplicidad de Representación: Al demostrar que cualquier estructura compleja puede aplanarse, Codd justifica el uso de arreglos bidimensionales como estructura de almacenamiento universal. Esto simplifica drásticamente la implementación de SGBD y facilita el intercambio de datos (interoperabilidad).
-
-Base Lógica Formal: La afirmación de que "el cálculo de predicados de primer orden basta" si las relaciones están en forma normal es un hito. Conecta la teoría de conjuntos y lógica con la práctica de las bases de datos, permitiendo que las consultas sean expresadas de manera declarativa y formalmente verificables. Esto es el germen de SQL.
-
-Separación de Responsabilidades: La distinción entre el sublenguaje de datos ($R$) y el lenguaje de host ($H$) anticipa la arquitectura moderna de capas en las aplicaciones de bases de datos, donde la lógica de datos se separa de la lógica de negocio y la presentación.
-
-Implicaciones Prácticas:
-
-Diseño de Esquemas: Proporciona un método sistemático para diseñar bases de datos libres de redundancia y anomalías.
-Optimización: Las relaciones en forma normal son más fáciles de indexar y optimizar, ya que no requieren manejo de punteros anidados o listas complejas.
-Interoperabilidad: El formato de comunicación basado en arreglos comprimidos sin punteros permite el intercambio de datos entre sistemas heterogéneos, un precursor de formatos como CSV o JSON en contextos de intercambio.
-Limitaciones y Supuestos:
-
-Asume que la normalización total siempre es deseable. En la práctica, la desnormalización ocasional es necesaria para optimizar el rendimiento de consultas complejas (un trade-off que Codd reconoce implícitamente al mencionar que "no se discuten otras operaciones de normalización").
-El enfoque en lógica de primer orden puede ser limitante para ciertos tipos de consultas recursivas o complejas que requieren lógica de orden superior (aunque esto se resolvió posteriormente con extensiones de SQL).
-La suposición de que todos los dominios pueden hacerse simples puede ser restrictiva para datos semiestructurados o complejos (como documentos XML o JSON modernos), aunque el modelo relacional ha evolucionado para manejar estos casos mediante tipos de datos especializados.
-Este trabajo cierra la trilogía de la teoría relacional: independencia de estructura (p. 378), independencia de representación (p. 380) y normalización/forma normal (p. 381), proporcionando un marco completo y riguroso para el diseño y gestión de bases de datos relacionales.
-
-Análisis Teórico: Lenguaje de Subdatos, Simetría Lógica y Conjuntos de Relaciones (Codd, 1970, p. 382)
-** Explicación Conceptual Detallada
-
-El texto de la página 382 profundiza en las capacidades lingüísticas del modelo relacional, definiendo la naturaleza del lenguaje de subdatos ($R$) y contrastándolo con los enfoques navegacionales (red/jerarquía). El argumento central es que la potencia del lenguaje no reside en su capacidad de cómputo general, sino en su poder descriptivo para especificar subconjuntos de datos mediante lógica de predicados. Codd establece que una vez que los datos están estructurados en relaciones, el usuario debe poder "explotar" (consultar, actualizar, borrar) esas relaciones de manera simétrica, tratándolas como relaciones matemáticas donde ningún argumento tiene prioridad intrínseca sobre otro en la semántica de la consulta.
-
-La lógica del autor se despliega en tres ejes:
-
-Poder Descriptivo vs. Cómputo: El lenguaje de consulta debe ser capaz de expresar cualquier fórmula bien formada del cálculo de predicados aplicado (o una forma normal equivalente, como la forma prenex). Esto permite definir cualquier subconjunto de datos válido sin necesidad de incrustar lógica de programación compleja en la consulta misma. Las funciones aritméticas y de lógica se delegan al lenguaje de host ($H$), manteniendo $R$ limpio y declarativo.
-Simetría Lógica de las Relaciones: A diferencia de los sistemas de red donde la navegación sigue caminos predefinidos (punteros de padre a hijo), en el modelo relacional una relación $n$-aria debe ser explotable simétricamente. Esto significa que cualquier combinación de atributos puede servir como "entrada" (conocida) para recuperar los "restantes" (desconocidos), sin importar el orden de almacenamiento. Codd demuestra que lograr esto en sistemas navegacionales requeriría $n!$ caminos nombrados, mientras que el modelo relacional lo hace con una sola relación nombrada.
-Clasificación de Relaciones: Se introducen distinciones formales entre:
-Conjunto Nombrado (Named Set): Relaciones explícitamente declaradas por los usuarios (almacenadas o vistas derivadas con nombre).
-Conjunto Expresible (Expressible Set): El conjunto universal de todas las relaciones que pueden derivarse mediante expresiones lógicas sobre el conjunto nombrado.
-Conjunto Almacenado (Stored Set): Las representaciones físicas subyacentes.
-El objetivo es demostrar que el modelo relacional reduce drásticamente la complejidad cognitiva y de gestión para el usuario. En lugar de definir múltiples estructuras de acceso (caminos) para cada tipo de consulta, el usuario define una sola relación lógica y deja que el sistema traduzca cualquier consulta simétrica en operaciones eficientes sobre el almacenamiento físico. Esto resuelve el problema de la "fragilidad" de los programas en sistemas antiguos, donde cambiar la ruta de acceso exigía reescribir el código.
-
-** Citas y Evidencia Textual Clave
-
-#+BEGIN_QUOTE The universality of the data sublanguage lies in its descriptive ability (not its computing ability). ... the class of qualification expressions which can be used in a set specification must have the descriptive power of the class of well-formed formulas of an applied predicate calculus. #+END_QUOTE Justificación: Define el alcance y la limitación del lenguaje de consulta: su poder reside en la especificación lógica de datos (cálculo de predicados), no en la ejecución de algoritmos generales.
-
-#+BEGIN_QUOTE Once a user is aware that a certain relation is stored, he will expect to be able to exploit it using any combination of its arguments as "knowns" and the remaining arguments as "unknowns," because the information (like Everest) is there. This is a system feature ... which we shall call (logically) symmetric exploitation of relations. #+END_QUOTE Justificación: Introduce el concepto de explotación simétrica, una propiedad fundamental del modelo relacional que lo distingue de los sistemas navegacionales. Es la base de la flexibilidad de las consultas SQL.
-
-#+BEGIN_QUOTE To support symmetric exploitation of a single binary relation, two directed paths are needed. For a relation of degree n, the number of paths to be named and controlled is n factorial. #+END_QUOTE Justificación: Proporciona una prueba combinatoria de la ineficiencia de los modelos navegacionales frente al relacional. Muestra cómo el costo de soportar consultas inversas crece factorialmente en sistemas de punteros.
-
-#+BEGIN_QUOTE The named set is the collection of all those relations that the community of users can identify b y means of a simple name... The expressible set is the total collection of relations that can be designated b y expressions in the data language. #+END_QUOTE Justificación: Establece la jerarquía formal de relaciones: el conjunto nombrado (explícito) es un subconjunto del conjunto expresible (derivado lógicamente), lo que permite la creación de vistas y consultas complejas sin almacenamiento físico adicional.
-
-#+BEGIN_QUOTE Ideally, the variety of permitted data representations should be just adequate to cover the spectrum of performance requirements... responsibility for providing efficient response and throughput shifts from the individual user to the data system. #+END_QUOTE Justificación: Enuncia el principio de independencia de datos física y el cambio de responsabilidad: el usuario se preocupa por la lógica, el sistema (optimizador) por la eficiencia física.
-
-** Desglose de Conceptos y Formalización Matemática
-
-*** Conceptos Técnicos
-
-Lenguaje de Subdatos ($R$): El lenguaje dedicado a la manipulación de datos, basado en lógica de predicados.
-Lenguaje de Host ($H$): El lenguaje de programación general (ej. COBOL, PL/I) donde se definen funciones aritméticas y de lógica de negocio.
-Explotación Simétrica (Symmetric Exploitation): La capacidad de utilizar cualquier subconjunto de atributos de una relación como filtro (entrada) para recuperar los demás, sin restricción de dirección.
-Conjunto Nombrado (Named Set): $\mathcal{N} = { R_1, R_2, \dots, R_k }$, relaciones declaradas explícitamente.
-Conjunto Expresible (Expressible Set): $\mathcal{E}$, el conjunto cerrado bajo operaciones lógicas y relacionales sobre $\mathcal{N}$. $\mathcal{N} \subset \mathcal{E}$.
-Conjunto Almacenado (Stored Set): $\mathcal{S}$, las representaciones físicas de las relaciones.
-Forma Prenex: Una forma normal lógica donde todos los cuantificadores se mueven al principio de la fórmula, suficiente para expresar cualquier consulta sin perder poder descriptivo.
-Dependencias de Actualización/Borrado: Reglas declarativas que especifican que la modificación de una relación debe propagar cambios a otras (análogo a triggers o integridad referencial en cascada).
-*** Formalización Matemática y Lógica
-
-A. Poder Descriptivo y Lógica de Predicados
-
-Una consulta en $R$ especifica un subconjunto $Q$ de una relación $R$: $$ Q = { t \in R \mid \phi(t) } $$ Donde $\phi(t)$ es una fórmula bien formada (wff) del cálculo de predicados de primer orden. El lenguaje es universal si: $$ \forall \psi \in \text{WFF}(\text{PredCalc}), \exists \phi \in \text{Syntax}(R) \text{ tal que } \phi \equiv \psi $$ Codd nota que no se necesita toda la sintaxis, basta con la forma prenex: $$ \phi = Q_1 x_1 Q_2 x_2 \dots Q_n x_n (M) $$ Donde $Q_i \in {\forall, \exists}$ y $M$ es una fórmula libre de cuantificadores (matriz).
-
-B. Simetría y Complejidad de Caminos
-
-Sea $R$ una relación de grado $n$ con atributos ${A_1, A_2, \dots, A_n}$. Para una consulta que fija un subconjunto $K \subset {A_i}$ de tamaño $k$ y busca el complemento $U = {A_i} \setminus K$:
-
-Modelo Relacional: Requiere 1 nombre de relación. La consulta es: $$ \pi_U (\sigma_{K = v} (R)) $$
-Modelo Navegacional (Punteros): Requiere definir un camino dirigido para cada posible dirección de búsqueda. El número de direcciones necesarias es el número de permutaciones de los atributos: $$ N_{paths} = n! $$ Ejemplo para $n=4$ (relación supply): $4! = 24$ caminos potenciales, o al menos uno para cada partición de entradas/salidas. Si se usan solo relaciones binarias anidadas, el número de nombres necesarios es $2n - 1$. Para $n=4$: $2(4) - 1 = 7$ nombres, en lugar de $n+1 = 5$ en notación $n$-aria directa.
-C. Conjuntos de Relaciones
-
-Conjunto Nombrado: $$ \mathcal{N} = { R \mid \text{DECLARED}(R) } $$
-Conjunto Expresible: $$ \mathcal{E} = \text{Closure}(\mathcal{N}, \text{Operaciones Relacionales}, \text{Lógica}) $$ Las operaciones incluyen: unión, diferencia, producto cartesiano, selección, proyección, y cuantificación.
-Relación entre Conjuntos: $$ \mathcal{N} \subseteq \mathcal{E} $$ $$ \mathcal{S} \xrightarrow{\text{mapeo}} \mathcal{N} $$ El sistema debe traducir cualquier $E \in \mathcal{E}$ a operaciones sobre $\mathcal{S}$ de manera eficiente.
-D. Dependencias de Actualización
-
-Si se declara una dependencia de borrado en cascada entre $R_1$ y $R_2$: $$ \forall t_1 \in R_1, t_2 \in R_2: (t_1[K] = t_2[F] \land \text{DELETE}(t_1)) \implies \text{DELETE}(t_2) $$ Esto se declara en $R$ y se ejecuta automáticamente, moviendo la lógica de integridad del código de la aplicación al sistema.
-
-** Importancia y Relevancia Teórica
-
-Este texto es fundamental porque establece la arquitectura de la independencia de datos y la filosofía de diseño de los SGBD modernos.
-
-Fundamento de la Simetría Relacional: La idea de "explotación simétrica" es la razón principal por la que el modelo relacional es tan potente. Permite consultas ad-hoc que no estaban previstas al diseñar la base de datos. En sistemas navegacionales, si no se definió el camino inverso, la consulta es imposible sin reescribir el software. Esto democratiza el acceso a los datos.
-
-Separación de Lógica y Física: Al afirmar que la responsabilidad de la eficiencia se traslada del usuario al sistema, Codd anticipa el desarrollo de optimizadores de consultas. El usuario solo describe qué quiere, el sistema decide cómo obtenerlo (índices, joins, ordenamiento). Esto es el corazón de SQL y de todos los SGBD comerciales.
-
-Jerarquía de Relaciones: La distinción entre conjunto nombrado, expresible y almacenado es crucial para entender las vistas (views) y la abstracción. Permite crear capas lógicas sobre datos físicos sin duplicación, facilitando la seguridad y la personalización de la información para diferentes usuarios.
-
-Lenguaje Declarativo: Al limitar el poder de cómputo del lenguaje de datos y centrarse en la descripción lógica, Codd allana el camino para lenguajes declarativos como SQL. Esto reduce la complejidad del código de la aplicación y minimiza errores.
-
-Eficiencia en el Diseño: La demostración de que los modelos navegacionales requieren un número factorial de caminos para lograr la misma flexibilidad que una relación relacional es un argumento matemático contundente a favor del modelo relacional. Explica por qué los sistemas de red y jerárquicos eran tan rígidos y difíciles de mantener.
-
-Implicaciones Prácticas:
-
-Seguridad: El sistema puede aplicar restricciones de seguridad a nivel de relación o atributo sin modificar el código de la aplicación.
-Mantenibilidad: Cambios en la estructura física (índices, particionamiento) no afectan las aplicaciones.
-Interoperabilidad: La estandarización del lenguaje de datos (basado en lógica) facilita la integración de sistemas.
-Limitaciones y Supuestos:
-
-Asume que el optimizador del sistema será lo suficientemente inteligente para traducir consultas simétricas en rutas físicas eficientes. En las primeras implementaciones, esto fue un desafío significativo.
-La suposición de que las funciones de lógica de negocio deben estar en el lenguaje de host ($H$) y no en el de datos ($R$) ha evolucionado con los procedimientos almacenados y triggers, que traen lógica compleja de vuelta al servidor de bases de datos.
-El enfoque en lógica de primer orden puede ser insuficiente para ciertos tipos de análisis recursivo complejo (aunque se han añadido extensiones como WITH RECURSIVE en SQL moderno).
-
-
-Análisis Teórico: Operaciones Relacionales, Join Natural y Redundancia (Codd, 1970, p. 383)
-** Explicación Conceptual Detallada
-
-El texto de la página 383 marca la transición de la teoría estática del modelo (definición de relaciones, dominios, claves) a la álgebra relacional dinámica. Codd introduce un conjunto de operaciones fundamentales para derivar nuevas relaciones a partir de las existentes, estableciendo la base matemática para la manipulación de datos. El argumento central es que, dado que las relaciones son conjuntos, heredan las operaciones de teoría de conjuntos, pero requieren operaciones específicas (Permutación, Proyección, Join) para manejar la estructura de atributos y las relaciones entre entidades.
-
-La lógica del autor se estructura en tres operaciones clave:
-
-Permutación: Intercambio de columnas. Codd aclara que, en el modelo lógico del usuario (donde el orden de dominios es irrelevante), la permutación no cambia la relación. Sin embargo, es crucial a nivel de implementación física para optimizar el rendimiento (ej. almacenar una versión de la tabla con columnas reordenadas para acelerar ciertos accesos), manteniendo la explotación simétrica.
-Proyección ($\pi$): Selección de un subconjunto de columnas (atributos) y eliminación de duplicados. Esta operación es la base de la creación de vistas y la reducción de datos. Codd destaca que la proyección puede reducir el número de tuplas si hay dependencias funcionales que hacen que filas distintas en la relación original sean idénticas en el subconjunto proyectado.
-Join (Unión Natural): La operación más crítica. Codd define formalmente el Join Natural ($R * S$) como la combinación de dos relaciones basándose en atributos comunes, preservando la información sin pérdida si la relación resultante es una expansión libre de redundancia de las originales. Define la joinabilidad: dos relaciones son joinables si existe una relación de grado superior que, al proyectarse, devuelve las originales.
-El objetivo es demostrar que estas operaciones son suficientes para construir cualquier consulta lógica y que el Join Natural es la operación que permite reconstruir la información global a partir de fragmentos normalizados, resolviendo así el problema de la fragmentación de datos sin necesidad de punteros. La distinción entre el Join Natural (que elimina duplicados y combina solo coincidencias exactas en los atributos comunes) y otros tipos de joins es fundamental para entender la integridad y la consistencia en bases de datos normalizadas.
-
-** Citas y Evidencia Textual Clave
-
-#+BEGIN_QUOTE Since relations are sets, all of the usual set operations are applicable to them. Nevertheless, the result may not be a relation; for example, the union of a binary relation and a ternary relation is not a relation. #+END_QUOTE Justificación: Establece la restricción fundamental de las operaciones de conjuntos en el contexto relacional: la compatibilidad de aridad (grado) es un requisito previo.
-
-#+BEGIN_QUOTE In a system which provides symmetric exploitation of relations, the set of queries answerable by a stored relation is identical to the set answerable by any permutation of that relation. #+END_QUOTE Justificación: Reafirma la independencia lógica respecto al orden de columnas y justifica la permutación como una herramienta de optimización física, no lógica.
-
-#+BEGIN_QUOTE Suppose now we select certain columns of a relation (striking out the others) and then remove from the resulting array any duplication in the rows. The final array represents a relation which is said to be a projection of the given relation. #+END_QUOTE Justificación: Define operacionalmente la Proyección, incluyendo el paso crucial de eliminación de duplicados, que asegura que el resultado sea siempre un conjunto válido.
-
-#+BEGIN_QUOTE A binary relation R is joinable with a binary relation S if there exists a ternary relation U such that $\pi_{12}(U) = R$ and $\pi_{23}(U) = S$. Any such ternary relation is called a join of R with S. #+END_QUOTE Justificación: Define rigurosamente la Joinabilidad y el concepto de Join como una relación padre que contiene la información combinada, estableciendo la base teórica para la descomposición y reconstrucción de datos.
-
-#+BEGIN_QUOTE One join that always exists in such a case is the natural join of R with S defined by $R * S = {(a,b,c): R(a,b) \land S(b,c)}$. #+END_QUOTE Justificación: Proporciona la definición formal del Join Natural usando lógica de predicados, la operación central para unir datos normalizados.
-
-#+BEGIN_QUOTE Inspection of these relations reveals an element (element 1) of the domain part ... with the property that it possesses more than one relative under R and also under S. #+END_QUOTE Justificación: Ilustra el fenómeno de la multiplicidad (relación muchos-a-muchos) y cómo el Join Natural maneja la combinación de múltiples coincidencias, generando el producto cartesiano de las coincidencias para los atributos comunes.
-
-** Desglose de Conceptos y Formalización Matemática
-
-*** Conceptos Técnicos
-
-Permutación: Reordenamiento de los atributos de una relación. Lógicamente neutra para el usuario, pero físicamente relevante.
-Proyección ($\pi_L(R)$): Operación unaria que selecciona un subconjunto de atributos $L$ de una relación $R$ y elimina filas duplicadas.
-Join Natural ($R * S$): Operación binaria que combina dos relaciones basándose en atributos comunes, produciendo una relación con la unión de esquemas de $R$ y $S$.
-Joinabilidad: Propiedad de dos relaciones que pueden ser combinadas sin pérdida de información en una relación de grado superior.
-Conversión de Duplicados: El proceso de eliminación de filas idénticas tras una proyección, esencial para mantener la propiedad de conjunto.
-Redundancia: La presencia de información duplicada que puede surgir de operaciones mal diseñadas o de la falta de normalización.
-*** Formalización Matemática y Lógica
-
-A. Permutación
-
-Sea $R$ una relación de grado $n$ con esquema $D = (d_1, d_2, \dots, d_n)$. Sea $\sigma$ una permutación del conjunto ${1, 2, \dots, n}$. La relación permutada $R'$ tiene esquema $D' = (d_{\sigma(1)}, d_{\sigma(2)}, \dots, d_{\sigma(n)})$. $$ R' = { (v_{\sigma(1)}, v_{\sigma(2)}, \dots, v_{\sigma(n)}) \mid (v_1, v_2, \dots, v_n) \in R } $$ En el modelo lógico (dominios desordenados), $R \equiv R'$.
-
-B. Proyección
-
-Sea $L = (i_1, i_2, \dots, i_k)$ una lista de índices de columnas de $R$ (donde $k \le n$). $$ \pi_L(R) = { (v_{i_1}, v_{i_2}, \dots, v_{i_k}) \mid (v_1, \dots, v_n) \in R } $$ Eliminación de Duplicados: El resultado se define como un conjunto, por lo que si dos tuplas en la proyección son idénticas, solo se conserva una. $$ | \pi_L(R) | \le |R| $$ La proyección puede reducir el cardinal de la relación si existen dependencias funcionales no triviales.
-
-C. Join Natural
-
-Sean $R$ y $S$ dos relaciones con esquemas $D_R$ y $D_S$. Sea $D_{common} = D_R \cap D_S$ el conjunto de atributos comunes (mismo nombre y dominio). El Join Natural $R * S$ se define como: $$ R * S = { t \mid \exists r \in R, s \in S : t[D_R] = r \land t[D_S] = s } $$ O, en notación de lógica de predicados (como en el texto para binarias): Si $R(A, B)$ y $S(B, C)$, entonces: $$ R * S = { (a, b, c) \mid R(a, b) \land S(b, c) } $$ El resultado es una relación con esquema $D_R \cup D_S$.
-
-D. Joinabilidad y Descomposición
-
-Dos relaciones $R$ y $S$ son joinables si existe una relación $U$ tal que: $$ \pi_{D_R}(U) = R \quad \text{y} \quad \pi_{D_S}(U) = S $$ En este caso, $U$ es un join de $R$ y $S$. El Join Natural es el join más pequeño (mínimo) que contiene toda la información de $R$ y $S$ sin añadir tuplas espurias (si no hay anomalías). Si $R * S$ satisface la condición de descomposición sin pérdida (lossless join), entonces: $$ \pi_{D_R}(R * S) = R \quad \text{y} \quad \pi_{D_S}(R * S) = S $$ Esto es fundamental para la normalización: permite dividir una relación grande en varias más pequeñas y reconstruirla exactamente.
-
-E. Ejemplo del Texto (Figuras 5, 6, 7)
-
-Dado: $R = { (1, 1), (2, 1), (2, 2) }$ (esquema: supplier, part) $S = { (1, 1), (1, 2), (2, 1) }$ (esquema: part, project) Atributo común: part.
-
-Join Natural $R * S$: Buscamos coincidencias en part.
-
-Para part=1: $R$ tiene $(1,1), (2,1)$; $S$ tiene $(1,1), (1,2)$. Combinaciones: $(1,1,1), (1,1,2), (2,1,1), (2,1,2)$.
-Para part=2: $R$ tiene $(2,2)$; $S$ tiene $(2,1)$. Combinación: $(2,2,1)$.
-Resultado (Figura 6): $$ { (1,1,1), (1,1,2), (2,1,1), (2,1,2), (2,2,1) } $$ Este resultado tiene 5 tuplas, mostrando cómo la multiplicidad en el atributo común (part=1 aparece 2 veces en $R$ y 2 veces en $S$) genera $2 \times 2 = 4$ combinaciones para ese valor.
-
-** Importancia y Relevancia Teórica
-
-Este texto es la piedra angular de la álgebra relacional, el fundamento matemático de SQL y de todos los SGBD relacionales modernos.
-
-Fundamentación Matemática de las Consultas: Codd demuestra que las operaciones de Proyección y Join son suficientes para expresar cualquier consulta lógica sobre datos relacionales. Esto convierte a las bases de datos de un sistema de almacenamiento pasivo a un sistema de procesamiento activo basado en reglas matemáticas.
-
-Teoría de la Descomposición Sin Pérdida: La definición formal de Join Natural y Joinabilidad es crucial para la teoría de normalización. Permite probar formalmente si una descomposición de una relación en varias más pequeñas (para eliminar redundancia) es reversible y no pierde información. Sin esto, la normalización sería un arte empírico en lugar de una ciencia rigurosa.
-
-Independencia de la Implementación: Al definir operaciones lógicas (como la proyección que elimina duplicados automáticamente) que son independientes del orden de almacenamiento, Codd refuerza la idea de que el usuario no necesita preocuparse por la estructura física. El sistema se encarga de traducir estas operaciones en rutinas de acceso eficientes.
-
-Manejo de Relaciones Muchos-a-Muchos: El ejemplo del Join Natural ilustra de manera elegante cómo el modelo relacional maneja relaciones complejas (muchos-a-muchos) mediante la combinación de claves foráneas, sin necesidad de punteros o estructuras anidadas. La multiplicidad de coincidencias se maneja naturalmente generando el producto cartesiano de las coincidencias, lo cual es intuitivo y poderoso.
-
-Optimización y Rendimiento: La mención de la permutación como operación relevante para el almacenamiento sienta las bases para la optimización de consultas. El optimizador puede elegir almacenar o reordenar datos físicamente (permutación) para acelerar ciertas operaciones de proyección o join, sin afectar la respuesta lógica del usuario.
-
-Implicaciones Prácticas:
-
-SQL: Las operaciones SELECT (proyección y selección), JOIN (join natural), y DISTINCT (eliminación de duplicados) son implementaciones directas de estas operaciones.
-Integridad: La capacidad de unir relaciones de forma fiable asegura que los datos fragmentados en diferentes tablas puedan ser reconstruidos correctamente, manteniendo la consistencia global.
-Diseño de Esquemas: Entender el Join Natural es esencial para diseñar esquemas normalizados que minimicen la redundancia y maximicen la integridad.
-Limitaciones y Supuestos:
-
-Asume que las operaciones se realizan sobre conjuntos finitos y que la eliminación de duplicados es una operación eficiente, lo cual puede ser costoso en bases de datos masivas.
-El Join Natural asume que los nombres de los atributos comunes son idénticos y que los dominios son compatibles, lo cual requiere un esquema bien definido.
-No aborda explícitamente el manejo de valores nulos (NULL), que es una extensión posterior al modelo relacional puro para manejar información incompleta.
-Este texto completa la definición del núcleo del modelo relacional: establece las operaciones básicas para manipular datos, define formalmente cómo se combinan y descomponen las relaciones, y provee la base matemática para la consistencia y la integridad de los datos en sistemas normalizados. Es el puente entre la teoría de conjuntos y la práctica de las bases de datos.
-
-Análisis Teórico: Ambigüedad en el Join, Join Cíclico y Composición Relacional (Codd, 1970, p. 384)
-** Explicación Conceptual Detallada
-
-El texto de la página 384 profundiza en las complejidades algebraicas del Join Natural, abordando el problema de la ambigüedad y la no unicidad de los resultados cuando se combinan relaciones. Codd introduce conceptos sofisticados para manejar situaciones donde múltiples "join" son posibles, definiendo condiciones bajo las cuales la ambigüedad se resuelve y presentando nuevas operaciones como el Join Cíclico y la Composición.
-
-El argumento central se desarrolla en tres niveles:
-
-Puntos de Ambigüedad: Codd define un "punto de ambigüedad" como un valor en el dominio de unión que tiene múltiples correspondencias en ambas relaciones involucradas. Si tal punto existe, el Join Natural no es único; existen múltiples ternarias (o de grado superior) que cumplen con las proyecciones de las relaciones originales. Esto ocurre cuando ninguna de las relaciones actúa como una función (es decir, cuando hay relaciones uno-a-muchos o muchos-a-muchos en la dirección del join).
-Resolución de Ambigüedad y Join Cíclico: La ambigüedad puede resolverse si existen otras relaciones que impongan restricciones adicionales. Codd introduce la noción de Join Cíclico (cyclic join), una operación que "ata los extremos" de una cadena de relaciones binarias para formar un ciclo cerrado. Formalmente, para tres relaciones $R, S, T$, el join cíclico requiere que se cumplan condiciones de consistencia circular ($R(a,b), S(b,c), T(c,a)$), lo que reduce drásticamente el espacio de soluciones posibles en comparación con un join lineal.
-Composición Relacional: Se define la Composición como una generalización de la composición de funciones, aplicada a relaciones binarias. La composición de $R$ con $S$ se obtiene tomando el Join Natural de $R$ y $S$ y luego proyectando sobre los dominios inicial y final, eliminando el dominio intermedio. Esto permite encadenar relaciones para derivar nuevas conexiones indirectas entre entidades.
-La lógica del autor es rigurosamente algebraica: define operaciones sobre conjuntos de tuplas, establece condiciones de existencia y unicidad, y demuestra cómo la estructura de los datos (funciones vs. relaciones generales) influye en la determinación de resultados. El objetivo es proporcionar un marco formal completo para la inferencia de relaciones derivadas, demostrando que el modelo relacional puede manejar consultas complejas y transitivas de manera matemáticamente precisa, incluso en presencia de ambigüedad.
-
-** Citas y Evidencia Textual Clave
-
-#+BEGIN_QUOTE Such an element in the joining domain is called a point of ambiguity with respect to the joining of R with S. If either $\pi_{21}(R)$ or $S$ is a function, no point of ambiguity can occur in joining R with S. #+END_QUOTE Justificación: Define el concepto crítico de punto de ambigüedad y establece la condición suficiente para la unicidad del Join Natural: si una de las relaciones es funcional (muchos-a-uno o uno-a-uno), el resultado es único.
-
-#+BEGIN_QUOTE Ambiguity in the joining of R with S can sometimes be resolved by means of other relations. Suppose we are given... a relation T on the domains project and supplier... #+END_QUOTE Justificación: Ilustra cómo la información adicional (tercera relación) puede actuar como un filtro para resolver ambigüedades, sentando las bases para el Join Cíclico.
-
-#+BEGIN_QUOTE To obtain the cyclic counterpart, we introduce the operator $\gamma$ which produces a relation of degree n - 1 from a relation of degree n by tying its ends together. Thus, if R is an n-ary relation... the tie of R is defined by the equation... #+END_QUOTE Justificación: Introduce formalmente el operador $\gamma$ (tie) y la operación de Join Cíclico, una generalización algebraica para cerrar ciclos de dependencias en datos relacionales.
-
-#+BEGIN_QUOTE T is a composition of R with S if there exists a join U of R with S such that $T = \pi_{13}(U)$. Thus, two relations are composable if and only if they are joinable. #+END_QUOTE Justificación: Define la Composición Relacional en términos de Join y Proyección, estableciendo que la composabilidad es equivalente a la joinabilidad, y generalizando el concepto de composición de funciones.
-
-#+BEGIN_QUOTE While it is possible for more than one cyclic 3-join to exist... the circumstances under which this can occur entail much more severe constraints than those for a plurality of 2-joins. #+END_QUOTE Justificación: Destaca la naturaleza restrictiva del Join Cíclico: es mucho más difícil que existan múltiples soluciones para un join cíclico que para un join lineal, lo que lo convierte en una herramienta poderosa para la consistencia y validación de datos.
-
-** Desglose de Conceptos y Formalización Matemática
-
-*** Conceptos Técnicos
-
-Punto de Ambigüedad: Un valor $x$ en el dominio de unión tal que existen múltiples tuplas en $R$ con $x$ y múltiples tuplas en $S$ con $x$, generando un producto cartesiano de combinaciones en el join.
-Join Lineal vs. Cíclico:
-Lineal: Combina relaciones en una cadena abierta ($R \bowtie S \bowtie T$). El resultado tiene grado suma de grados menos grados de unión.
-Cíclico: Combina relaciones en un ciclo cerrado ($R \bowtie S \bowtie T$ con cierre en el primer dominio). El resultado tiene grado menor (se "cierra" el ciclo).
-Operador $\gamma$ (Tie): Opera sobre una relación $n$-aria para producir una $(n-1)$-aria igualando el primer y último dominio ($a_1 = a_n$).
-Composición Relacional ($R \circ S$): La relación resultante de unir $R$ y $S$ y proyectar los dominios extremos, eliminando el intermediario.
-Composabilidad: Propiedad de dos relaciones de poder ser compuestas, equivalente a ser joinables.
-*** Formalización Matemática y Lógica
-
-A. Punto de Ambigüedad y Unicidad del Join
-
-Sea $R(A, B)$ y $S(B, C)$. Un valor $b_0 \in \text{Dom}(B)$ es un punto de ambigüedad si: $$ |{ a \mid (a, b_0) \in R }| > 1 \quad \land \quad |{ c \mid (b_0, c) \in S }| > 1 $$ Si tal $b_0$ existe, el Join Natural $R * S$ no es único en el sentido de que existen múltiples relaciones ternarias $U$ tales que $\pi_{AB}(U) = R$ y $\pi_{BC}(U) = S$ (aunque el Join Natural estándar es único, la existencia de otras uniones posibles es lo que Codd analiza aquí). Teorema de Unicidad: Si $R$ es una función ($A \to B$) o $S$ es una función ($B \to C$), entonces el Join es único y no hay ambigüedad. $$ (R \text{ es función}) \lor (S \text{ es función}) \implies \text{Unicidad}(R * S) $$
-
-B. Join Cíclico (Cyclic 3-Join)
-
-Dados $R(A, B)$, $S(B, C)$, $T(C, A)$. El Join Cíclico es una relación $V(A, B, C)$ tal que: $$ \pi_{AB}(V) = R, \quad \pi_{BC}(V) = S, \quad \pi_{CA}(V) = T $$ Y satisface la condición de ciclo: $$ V = { (a, b, c) \mid R(a, b) \land S(b, c) \land T(c, a) } $$ Codd define el operador $\gamma$ (tie) para una relación $n$-aria $U$: $$ \gamma(U) = { (a_1, \dots, a_{n-1}) \mid U(a_1, \dots, a_n) \land a_1 = a_n } $$ Para el caso de 3 relaciones binarias, el Join Cíclico se puede ver como el Join Lineal seguido de una proyección y una restricción de igualdad, o directamente como la intersección de las condiciones.
-
-C. Composición Relacional
-
-La composición de $R(A, B)$ con $S(B, C)$ se define como: $$ R \circ S = \pi_{AC}(R * S) $$ Donde $R * S = { (a, b, c) \mid R(a, b) \land S(b, c) }$. Por lo tanto: $$ R \circ S = { (a, c) \mid \exists b : R(a, b) \land S(b, c) } $$ Esto generaliza la composición de funciones $g(f(x))$. Dos relaciones son composable si y solo si son joinables (comparten un dominio compatible).
-
-D. Condiciones para Join Cíclico Múltiple
-
-Para que existan múltiples Join Cíclicos, se requieren puntos de ambigüedad en cada paso del ciclo y una estructura de datos específica que permita múltiples ciclos cerrados. En el ejemplo de la Figura 8: $R = {(1,a), (2,a), (2,b)}$, $S = {(a,d), (a,e), (b,d), (b,e)}$, $T = {(d,1), (d,2), (e,2)}$. Se pueden formar ciclos como $(1,a,d)$ y $(2,b,e)$, pero también combinaciones cruzadas si las condiciones lo permiten. La existencia de múltiples soluciones es mucho más restrictiva que en el join lineal.
-
-** Importancia y Relevancia Teórica
-
-Este texto es fundamental porque expande la álgebra relacional más allá de las operaciones básicas, abordando la complejidad de las relaciones transitivas y cíclicas.
-
-Formalización de la Inferencia Transitiva: La Composición Relacional es la base matemática para consultas transitivas (ej. "encuentra todos los proveedores indirectos de un proyecto"). Esto permite modelar cadenas de dependencia y relaciones indirectas de manera elegante y precisa.
-Validación de Consistencia de Datos: El Join Cíclico es una herramienta poderosa para validar la consistencia de datos en sistemas donde las relaciones forman ciclos (ej. dependencias circulares en redes, flujos de trabajo). Si el Join Cíclico es vacío, indica una inconsistencia en los datos. Si es múltiple, indica ambigüedad que debe ser resuelta.
-Análisis de Ambigüedad: La identificación de puntos de ambigüedad es crucial para el diseño de esquemas y la comprensión de la cardinalidad de las relaciones. Ayuda a predecir cuándo las consultas pueden devolver resultados ambiguos o múltiples, lo cual es vital para la integridad de los datos y la experiencia del usuario.
-Generalización de Conceptos: Codd demuestra cómo conceptos de funciones (composición, unicidad) se generalizan a relaciones, proporcionando un marco unificado para el manejo de datos. Esto enriquece el modelo relacional, permitiendo expresar consultas que serían muy complejas o imposibles en modelos navegacionales.
-Implicaciones para Optimización: Entender cuándo un join es único (por ser funcional) permite al optimizador de consultas tomar decisiones más inteligentes sobre la estrategia de ejecución (ej. evitar búsquedas innecesarias si se sabe que el resultado es único).
-Limitaciones y Supuestos:
-La complejidad computacional de los joins cíclicos y la detección de ambigüedad puede ser alta en bases de datos grandes.
-El modelo asume dominios perfectamente compatibles y definidos; en la práctica, la limpieza de datos es un desafío previo.
-La notación algebraica es poderosa pero puede ser menos intuitiva para usuarios no técnicos que el lenguaje SQL, aunque SQL implementa estas operaciones de forma subyacente.
-Este trabajo completa la definición del álgebra relacional, proporcionando un conjunto completo de operaciones para manipular, combinar e inferir relaciones, y estableciendo las bases teóricas para la consistencia, la integridad y la potencia expresiva de los sistemas de bases de datos relacionales. Es un testimonio de la profundidad matemática del modelo de Codd y su capacidad para manejar la complejidad del mundo real.
-
-
-Análisis Teórico: Composición, Restricción y Redundancia Fuerte en el Modelo Relacional (Codd, 1970, p. 385)
-** Explicación Conceptual Detallada
-
-El texto de la página 385 completa la definición de las operaciones algebraicas fundamentales (Composición y Restricción) y establece el marco teórico para la Redundancia y la Derivabilidad, conceptos centrales para el diseño de esquemas eficientes y la integridad de datos.
-
-El argumento central se divide en dos partes:
-
-Operaciones Avanzadas y la "Trampa de la Conexión": Codd define la Composición Natural ($R.S$) como la proyección del Join Natural sobre los dominios extremos, eliminando el intermediario. Advierte sobre la "trampa de la conexión" (connection trap), un error común en sistemas navegacionales donde se asume que seguir punteros a través de una cadena (Proveedor $\to$ Parte $\to$ Proyecto) genera automáticamente la relación correcta (Proveedor $\to$ Proyecto). Codd demuestra que esto solo es cierto si la relación objetivo es exactamente la composición natural de las relaciones intermedias. Si existen ambigüedades o múltiples caminos, la navegación por punteros puede generar resultados incorrectos o incompletos, mientras que la composición relacional (basada en lógica) es precisa y robusta.
-Redundancia y Derivabilidad: Se introduce una definición formal de derivabilidad: una relación $R$ es derivable de un conjunto $S$ si puede obtenerse mediante una secuencia de operaciones (proyección, join natural, tie, restricción) que se mantiene válida "para todo tiempo" (es decir, es una ley de integridad o una vista definida). Basado en esto, se define la Redundancia Fuerte: un conjunto de relaciones es fuertemente redundante si contiene una relación que puede ser derivada (específicamente, una de sus proyecciones) de otras relaciones en el conjunto. Esto proporciona un criterio matemático para identificar y eliminar almacenamiento innecesario, promoviendo la normalización.
-La lógica del autor es rigurosa: distingue entre operaciones que producen resultados únicos (como el Join Natural) y aquellas que no (como el Join genérico), y utiliza esta distinción para definir qué relaciones son verdaderamente redundantes y cuáles son necesarias. El objetivo es demostrar que el modelo relacional, a diferencia de los navegacionales, permite verificar formalmente la consistencia y la no redundancia de los datos mediante álgebra.
-
-** Citas y Evidencia Textual Clave
-
-#+BEGIN_QUOTE A lack of understanding of relational composition has led several systems designers into what may be called the connection trap. ... Such a conclusion is correct only in the very special case that the target relation between projects and suppliers is, in fact, the natural composition of the other two relations. #+END_QUOTE Justificación: Advierte sobre un error crítico de diseño en sistemas no relacionales: la asunción de que la navegación por punteros equivale a la composición lógica. Destaca la superioridad del modelo relacional para inferir relaciones correctamente.
-
-#+BEGIN_QUOTE A relation R is O-derivable from a set S of relations if there exists a sequence of operations from the collection O which, for all time, yields R from members of S. #+END_QUOTE Justificación: Define formalmente la derivabilidad, introduciendo la crucial cláusula "para todo tiempo" para distinguir entre resultados temporales y leyes de integridad o vistas permanentes.
-
-#+BEGIN_QUOTE A set of relations is strongly redundant if it contains at least one relation that possesses a projection which is derivable from other projections of relations in the set. #+END_QUOTE Justificación: Proporciona la definición precisa de Redundancia Fuerte, el criterio para eliminar almacenamientos innecesarios y garantizar la eficiencia del esquema.
-
-#+BEGIN_QUOTE The operation is defined only if equality is applicable between elements of $\pi_{L_h}(R)$ on the one hand and $\pi_{M_h}(S)$ on the other for all h = 1, 2, ..., k. #+END_QUOTE Justificación: Establece los requisitos de dominio para la operación de Restricción, asegurando que las comparaciones sean válidas y lógicas.
-
-** Desglose de Conceptos y Formalización Matemática
-
-*** Conceptos Técnicos
-
-Composición Natural ($R \circ S$ o $R.S$): La relación resultante de unir $R$ y $S$ y proyectar los dominios no comunes. Es la generalización de la composición de funciones.
-Trampa de la Conexión (Connection Trap): El error de asumir que la concatenación de caminos físicos (punteros) equivale a la relación lógica derivada. Ocurre cuando hay ambigüedad o múltiples caminos no capturados por la estructura física.
-Restricción ($R \restriction_{L,M} S$): Una operación que filtra las tuplas de $R$ basándose en la coincidencia con tuplas de $S$ en columnas específicas definidas por los índices $L$ y $M$.
-Derivabilidad ($O$-derivable): La propiedad de una relación de ser obtenida de otras mediante operaciones definidas, de manera consistente en el tiempo.
-Redundancia Fuerte (Strong Redundancy): La existencia de una relación (o proyección de ella) que es derivable de otras, indicando almacenamiento innecesario.
-Operaciones Base ($O_1$): El conjunto mínimo de operaciones para definir derivabilidad: Proyección, Join Natural, Tie (cierre cíclico), y Restricción.
-*** Formalización Matemática y Lógica
-
-A. Composición Natural
-
-Dados $R(A, B)$ y $S(B, C)$. La composición natural se define como: $$ R \circ S = \pi_{AC}(R * S) $$ Donde $R * S$ es el Join Natural. $$ R \circ S = { (a, c) \mid \exists b : R(a, b) \land S(b, c) } $$ Codd nota que si existen múltiples joins ($U_1, U_2, \dots$), puede haber múltiples composiciones, pero la composición natural es la única derivada del Join Natural único.
-
-B. Restricción ($R \restriction_{L,M} S$)
-
-Sean $R$ (grado $n$) y $S$ (grado $m$). Sean $L = (l_1, \dots, l_k)$ e $M = (m_1, \dots, m_k)$ listas de índices de columnas. La restricción $R'$ es el subconjunto maximal de $R$ tal que: $$ \pi_{L}(R') = \pi_{M}(S) $$ Formalmente: $$ R' = { t \in R \mid \exists s \in S : t[l_1] = s[m_1] \land \dots \land t[l_k] = s[m_k] } $$ Esta operación actúa como un filtro complejo: solo se mantienen las tuplas de $R$ que tienen una "contraparte" en $S$ según las columnas especificadas.
-
-C. Derivabilidad y Redundancia
-
-Sea $O = { \pi, , \gamma, \restriction }$ el conjunto de operaciones. Una relación $R$ es $O$-derivable de un conjunto $S = {R_1, \dots, R_k}$ si: $$ \exists f \in O^: R = f(R_1, \dots, R_k) $$ Donde $f$ es una composición de operaciones de $O$ que es válida "para todo tiempo" (es una invariante).
-
-Redundancia Fuerte: Un conjunto $S$ es fuertemente redundante si: $$ \exists R \in S : \exists \text{ proyección } \pi(R) \text{ tal que } \pi(R) \text{ es } O\text{-derivable de } S \setminus {R} $$ Esto significa que $R$ (o parte de ella) es innecesaria porque puede reconstructirse siempre de las demás.
-
-D. Ejemplo de la Trampa de la Conexión
-
-Sea $R(S, P)$ (Proveedor, Parte) y $S(P, J)$ (Parte, Proyecto). El camino físico sugiere: $R \to S \implies$ Proveedor a Proyecto. La relación lógica correcta es $R \circ S = \pi_{SJ}(R * S)$. Si el sistema navega por punteros y asume que el resultado es la relación $T(S, J)$, se comete la trampa si $T \neq R \circ S$. Esto ocurre si:
-
-Hay ambigüedad en los punteros (múltiples caminos).
-La relación $T$ contiene información adicional o restricciones no capturadas por $R$ y $S$.
-La relación $T$ es una vista definida por otras reglas no transitivas.
-** Importancia y Relevancia Teórica
-
-Este texto es crucial porque cierra el círculo de la teoría relacional, conectando las operaciones algebraicas con el diseño práctico de bases de datos y la integridad.
-
-Desenmascarando la "Trampa de la Conexión": Esta es una de las contribuciones más prácticas del artículo. Codd demuestra matemáticamente por qué los sistemas navegacionales (basados en punteros) son propensos a errores de inferencia y por qué el modelo relacional (basado en lógica) es superior para derivar relaciones complejas. Esto justifica la transición masiva a SQL y las bases de datos relacionales.
-
-Fundamento de la Normalización: La definición de Redundancia Fuerte proporciona el criterio teórico para la normalización. Permite identificar formalmente qué tablas o columnas son innecesarias porque su información ya está contenida en otras. Esto es la base de las formas normales (2NF, 3NF, BCNF).
-
-Operaciones de Filtrado Avanzado: La Restricción es una operación poderosa que generaliza la selección simple ($\sigma$) y permite filtrar datos basándose en la coincidencia con otro conjunto de datos, no solo en valores constantes. Esto es esencial para consultas complejas y actualizaciones condicionales.
-
-Integridad y Consistencia: La noción de derivabilidad "para todo tiempo" es la base de las restricciones de integridad y las vistas materializadas. Permite definir reglas que deben mantenerse invariantes a medida que los datos cambian, asegurando la consistencia global.
-
-Eficiencia de Almacenamiento: Al identificar la redundancia fuerte, se puede diseñar esquemas que minimicen el espacio de almacenamiento y eviten anomalías de actualización (actualizar en un lugar pero no en otro).
-
-Implicaciones Prácticas:
-
-Diseño de Esquemas: Guía a los diseñadores para crear esquemas normalizados y libres de redundancia.
-Optimización: El sistema puede detectar redundancia y evitar almacenar datos derivables, o usar la derivabilidad para responder consultas sin acceder a todas las tablas.
-Validación: Permite verificar si un conjunto de datos satisface ciertas leyes de integridad (ej. "¿Es esta tabla realmente redundante?").
-Limitaciones y Supuestos:
-
-Asume que las operaciones son perfectas y que los datos son consistentes. En la práctica, la limpieza de datos es un desafío.
-La definición de "para todo tiempo" requiere que las restricciones sean invariantes, lo cual puede no ser cierto en sistemas con lógica de negocio compleja que cambia con el tiempo.
-La complejidad de calcular la derivabilidad puede ser alta en esquemas muy grandes, aunque el optimizador del SGBD debe manejar esto automáticamente.
-Este texto completa la sección de operaciones y redundancia, proporcionando un marco completo y riguroso para entender cómo se manipulan, combinan y optimizan los datos en el modelo relacional. Es la base teórica que permite a los sistemas modernos manejar datos complejos de manera eficiente, consistente y libre de errores de inferencia.
-
-Análisis Teórico: Redundancia (Fuerte y Débil) y Consistencia en el Modelo Relacional (Codd, 1970, pp. 386-387)
-** Explicación Conceptual Detallada
-
-El texto de las páginas 386 y 387 (identificadas erróneamente como 356 y 387 en la transición, pero correspondientes a la continuidad del análisis de Codd sobre redundancia y consistencia) establece una distinción crítica entre la redundancia en el conjunto nombrado (la vista lógica del usuario) y la redundancia en el conjunto almacenado (la implementación física). Codd argumenta que la redundancia no es inherentemente negativa; puede ser una herramienta deliberada para la conveniencia del usuario o la compatibilidad con sistemas heredados, siempre que se gestione bajo reglas estrictas de consistencia.
-
-La lógica del argumento se despliega en tres niveles:
-
-Redundancia Fuerte (Strong Redundancy): Se define formalmente como una relación (o su proyección) que es derivada de otras relaciones en el conjunto nombrado mediante operaciones algebraicas (proyección, join natural, restricción). Es una relación matemática precisa: $R_i = f(R_1, \dots, R_n)$. El ejemplo clásico es una relación employee que contiene managername, la cual es derivable de una relación manager unida a employee vía manager#. Esta redundancia es "fuerte" porque la relación debe mantenerse igual para todo tiempo ($t$), independientemente de los cambios en los datos.
-Redundancia Débil (Weak Redundancy): Es una condición más laxa donde una relación no es derivable de manera única (no existe una ecuación fija), pero sus valores en cualquier instante son consistentes con alguna composición o join de otras relaciones. Ocurre cuando existen ambigüedades o relaciones complejas (muchos-a-muchos) que no permiten una función única, pero donde existen restricciones semánticas que vinculan los datos. A diferencia de la fuerte, no se puede expresar como una ecuación simple, sino como una propiedad de pertenencia a un conjunto de composiciones posibles.
-Consistencia: Se define como la propiedad de un estado instantáneo de la base de datos de satisfacer el conjunto de restricciones ($\Sigma$) que definen las redundancias. Si la base de datos es redundante (fuerte o débil), el sistema debe verificar que los datos actualizados no violen las reglas de derivación o composición. Codd destaca que la consistencia es una propiedad del estado instantáneo, no del proceso que lo generó (omisión o comisión de errores).
-El objetivo es proporcionar un marco formal para gestionar la redundancia: permitirla cuando es útil (para rendimiento o compatibilidad) pero asegurando que el sistema pueda detectar y prevenir inconsistencias. Esto es fundamental para la integridad de los datos en sistemas donde la normalización estricta (eliminación total de redundancia) puede no ser práctica o deseable por razones de rendimiento.
-
-** Citas y Evidencia Textual Clave
-
-#+BEGIN_QUOTE Redundancy in the named set of relations must be distinguished from redundancy in the stored set of representations. We are primarily concerned here with the former. #+END_QUOTE Justificación: Establece la distinción fundamental entre la redundancia lógica (vista del usuario) y la física (almacenamiento), enfocándose en la primera como un problema de diseño de esquema y semántica.
-
-#+BEGIN_QUOTE A relation R is $\mathcal{O}$-derivable from a set S of relations if there exists a sequence of operations from the collection $\mathcal{O}$ which, for all time, yields R from members of S. #+END_QUOTE Justificación: Define rigurosamente la derivabilidad, la base de la redundancia fuerte. La cláusula "for all time" es crucial: la relación debe ser una consecuencia lógica permanente de las otras, no solo en un instante dado.
-
-#+BEGIN_QUOTE A set of relations is strongly redundant if it contains at least one relation that possesses a projection which is derivable from other projections of relations in the set. #+END_QUOTE Justificación: La definición formal de Redundancia Fuerte. Permite identificar relaciones que son meramente vistas derivadas y que, por tanto, no necesitan almacenamiento físico independiente si se puede garantizar su consistencia.
-
-#+BEGIN_QUOTE A collection of relations is weakly redundant if it contains a relation that has a projection which is not derivable from other members but is at all times a projection of some join of other projections of relations in the collection. #+END_QUOTE Justificación: Define la Redundancia Débil, capturando situaciones donde la relación no es única pero es consistente con el conjunto de otras relaciones. Es más difícil de detectar y gestionar que la fuerte.
-
-#+BEGIN_QUOTE Given a collection C of time-varying relations, an associated set $\Sigma$ of constraint statements and an instantaneous value V for C, we shall call the state (C, $\Sigma$, V) consistent or inconsistent according as V does or does not satisfy $\Sigma$. #+END_QUOTE Justificación: Formaliza el concepto de Consistencia. Una base de datos es consistente si su estado actual satisface las restricciones definidas por las redundancias. Es una propiedad de estado, no de transacción.
-
-#+BEGIN_QUOTE It is important to note that consistency as defined above is a property of the instantaneous state of a data bank, and is independent of how that state came about. #+END_QUOTE Justificación: Aclara que la consistencia se verifica en el resultado final, sin importar si el error fue por omisión (falta de actualización) o comisión (actualización incorrecta). El sistema debe ser capaz de detectar la inconsistencia independientemente de su origen.
-
-** Desglose de Conceptos y Formalización Matemática
-
-*** Conceptos Técnicos
-
-Redundancia Fuerte (Strong Redundancy): Una relación $R$ es fuerte-mente redundante si existe una expresión algebraica $E$ sobre otras relaciones $S$ tal que $R = E(S)$ para todo $t$.
-Redundancia Débil (Weak Redundancy): Una relación $R$ es débil-mente redundante si no es derivable de forma única, pero para todo $t$, $R(t) \subseteq \pi(E(S(t)))$ para alguna composición $E$ y proyección $\pi$.
-Derivabilidad ($\mathcal{O}$-derivable): La propiedad de que una relación puede ser generada a partir de otras mediante un conjunto de operaciones $\mathcal{O}$ (join natural, proyección, restricción, tie).
-Consistencia: Un estado $V$ es consistente con un conjunto de restricciones $\Sigma$ si $V \models \Sigma$.
-Conjunto Nombrado (Named Set): La colección de relaciones que los usuarios pueden identificar por nombre.
-Conjunto Almacenado (Stored Set): Las representaciones físicas de las relaciones.
-Restricción (Restriction): Una operación que filtra una relación $R$ basándose en los valores de otra relación $S$ en dominios comunes.
-*** Formalización Matemática y Lógica
-
-A. Redundancia Fuerte
-
-Sea $\mathcal{S} = {R_1, R_2, \dots, R_k}$ un conjunto de relaciones. Una relación $R_i \in \mathcal{S}$ es fuerte-mente redundante si existe una expresión $\mathcal{E}$ compuesta por operaciones en $\mathcal{O} = {\text{join}, \text{proj}, \text{restriction}, \text{tie}}$ tal que: $$ \forall t: R_i(t) = \mathcal{E}(R_1(t), \dots, R_{i-1}(t), R_{i+1}(t), \dots, R_k(t)) $$ Ejemplo 1 (Empleado-Manager): Sea $E(\text{serial#}, \text{name}, \text{manager#}, \text{managername})$. Sea $M(\text{serial#}, \text{name})$ (relación de managers). La redundancia es fuerte si: $$ \pi_{\text{managername}}(E) = \pi_{\text{serial#, name}}(E) \bowtie M $$ O más simplemente, si $E$ se puede derivar de $E'(\text{serial#}, \text{name}, \text{manager#})$ y $M$.
-
-Ejemplo 2 (Proveedores, Departamentos, Proyectos): Sean $P(s#, d#, \dots)$, $Q(s#, j#, \dots)$, $R(d#, j#, \dots)$. Condición $C$: $s$ suministra a $d$ si y solo si $s$ suministra a un proyecto $j$ al que $d$ está asignado. Esto se expresa como: $$ \pi_{s#, d#}(P) = \pi_{s#, j#}(Q) \bowtie \pi_{d#, j#}(R) $$ Si esta ecuación se cumple para todo $t$, entonces $P$ es fuerte-mente redundante respecto a $Q$ y $R$.
-
-B. Redundancia Débil
-
-Una relación $R_i$ es débil-mente redundante si:
-
-No existe una expresión única $\mathcal{E}$ tal que $R_i(t) = \mathcal{E}(S(t))$ para todo $t$.
-Pero $\forall t$, existe algunas composiciones $C_t$ de otras relaciones tal que $R_i(t) \subseteq \pi(C_t(S(t)))$. Esto ocurre cuando hay ambigüedades (puntos de ambigüedad) que impiden una función única, pero las relaciones están vinculadas por restricciones semánticas. Ejemplo: Si $P, Q, R$ del ejemplo anterior no cumplen la condición $C$ para todo $t$, pero siempre existen combinaciones que las vinculan, entonces hay redundancia débil.
-C. Consistencia
-
-Sea $V = (v_1, v_2, \dots, v_k)$ el estado instantáneo de las relaciones $R_1, \dots, R_k$. Sea $\Sigma = { \phi_1, \phi_2, \dots, \phi_m }$ un conjunto de restricciones (ecuaciones o implicaciones lógicas). El estado $V$ es consistente si: $$ V \models \Sigma \iff \forall \phi \in \Sigma, \phi(V) \text{ es verdadero} $$ Ejemplo de verificación de consistencia para la restricción de composición: Dado $T$ es composición de $R$ y $S$: $$ \forall (a, c) \in \pi_{12}(T), \exists b : (a, b) \in \pi_{12}(R) \land (b, c) \in \pi_{12}(S) $$ Si esta condición se viola en algún instante, el estado es inconsistente.
-
-D. Operación de Restricción
-
-La restricción de $R$ por $S$ en dominios $L$ y $M$: $$ R \restriction_{L,M} S = { t \in R \mid \pi_L(t) \in \pi_M(S) } $$ Donde $L$ e $M$ son listas de índices de columnas de igual longitud.
-
-** Importancia y Relevancia Teórica
-
-Este texto es fundamental porque aborda el problema de la integridad y la redundancia en sistemas de bases de datos, un tema que sigue siendo central en el diseño de esquemas y la gestión de datos.
-
-Gestión de la Redundancia: Codd demuestra que la redundancia no es un mal absoluto. La redundancia fuerte puede ser útil para la conveniencia del usuario (evitar joins complejos en consultas frecuentes) o para la compatibilidad con sistemas heredados. El punto clave es que debe ser controlada y consistente.
-Fundamento de las Restricciones de Integridad: La definición de consistencia y las restricciones ($\Sigma$) son la base de las constraints modernas (claves foráneas, restricciones de verificación, triggers). El modelo relacional permite declarar explícitamente las reglas de negocio que deben cumplirse.
-Distinción entre Lógico y Físico: Al distinguir entre redundancia en el conjunto nombrado y en el almacenado, Codd permite que el administrador de la base de datos elija estrategias de almacenamiento (ej. materializar vistas derivadas para rendimiento) sin afectar la lógica del usuario, siempre que se mantenga la consistencia.
-Algoritmos de Verificación: El texto sugiere la existencia de algoritmos para verificar la consistencia (ej. verificar si una tupla en $T$ tiene una correspondencia en $R$ y $S$). Esto es la base de los mecanismos de integridad referencial y verificación de constraints en los SGBD.
-Implicaciones Prácticas:
-Diseño de Esquemas: Permite diseñar esquemas que incluyen vistas derivadas (redundancia fuerte) para optimizar consultas, sabiendo que el sistema puede verificar su consistencia.
-Mantenimiento: Si una relación es fuerte-mente redundante, las actualizaciones deben propagarse a todas las relaciones derivadas para mantener la consistencia. Esto es un desafío de transaccionalidad.
-Rendimiento: La redundancia débil y fuerte pueden mejorar el rendimiento de consultas al evitar joins costosos, pero a costa de un mayor costo de actualización y almacenamiento.
-Limitaciones y Supuestos:
-Asume que el sistema puede detectar y hacer cumplir las restricciones de consistencia en tiempo real, lo cual puede ser costoso en sistemas de gran escala con alta concurrencia.
-La distinción entre redundancia fuerte y débil puede ser difusa en la práctica, especialmente cuando las reglas de negocio son complejas o cambian con el tiempo.
-El enfoque en consistencia instantánea puede no ser suficiente para sistemas que requieren consistencia eventual o transaccional a largo plazo.
-Este trabajo completa la trilogía de la teoría relacional sobre la manipulación y consistencia de datos: operaciones algebraicas, redundancia y consistencia. Proporciona un marco riguroso para diseñar, implementar y mantener bases de datos relacionales que sean tanto flexibles como confiables, sentando las bases para los sistemas de gestión de datos modernos que equilibran rendimiento, integridad y usabilidad.
+** Recuento histórico — Codd (1970), "A Relational Model of Data for Large Shared Data Banks"
+
+*** Contexto y motivación del artículo
+
+Codd escribe este artículo en 1970 mientras trabaja en el laboratorio de
+investigación de IBM en San José. El problema que plantea no es de
+rendimiento ni de almacenamiento, sino de independencia de datos: los
+programas de aplicación y las actividades en terminales no deberían
+romperse cuando cambia la forma en que los datos están organizados
+internamente, ni siquiera cuando cambian ciertos aspectos de cómo se
+presentan externamente. Codd observa que los sistemas existentes en esa
+época, basados en archivos jerárquicos o en modelos de red, atan la lógica
+de la aplicación a la estructura física de almacenamiento, de manera que
+cualquier reorganización interna obliga a reescribir el software que
+depende de ella.
+
+Tres dependencias en particular llaman su atención, y dedica una sección
+de su artículo a cada una.
+
+**** Dependencia de orden
+
+Si un programa asume que los registros de un archivo se recuperan en un
+orden específico (por ejemplo, por número de serie de una pieza), y
+después se vuelve necesario almacenar esos datos en otro orden, el
+programa deja de funcionar correctamente. Codd señala que ningún sistema
+comercial de la época distinguía con claridad entre el orden de
+presentación de los datos al usuario y el orden en que están realmente
+almacenados.
+
+**** Dependencia de indexación
+
+Un índice mejora el tiempo de respuesta a consultas, pero ralentiza las
+inserciones y borrados, y desde el punto de vista de la información que
+contiene, es redundante: no aporta nada que no esté ya en los datos
+mismos. El problema es que algunos sistemas, como IDS, exigían que los
+programas referenciaran los índices por nombre para aprovechar el
+beneficio de rendimiento, y esos programas dejaban de funcionar si el
+índice se eliminaba más adelante.
+
+**** Dependencia de ruta de acceso
+
+Esta es la dependencia que Codd ilustra con más detalle, usando un
+ejemplo de piezas y proyectos. Si una base de datos jerárquica modela la
+relación entre piezas y proyectos (qué cantidad de una pieza está
+comprometida en qué proyecto), existen al menos cinco maneras distintas
+de organizar esa jerarquía: proyectos subordinados a piezas, piezas
+subordinadas a proyectos, piezas y proyectos como entidades del mismo
+nivel con la relación de compromiso subordinada a una u otra, o los tres
+—piezas, proyectos y la relación de compromiso— como entidades
+independientes y al mismo nivel.
+
+Codd demuestra que un programa escrito para una de estas cinco
+estructuras, sin verificar cuál está vigente, fallará en al menos tres de
+las otras cuatro. La causa es simple: el programa intenta acceder a un
+archivo que no existe en esa estructura, o no intenta acceder a un
+archivo que sí contiene la información que necesita. Como no es práctico
+escribir programas que comprueben todas las estructuras posibles, estos
+programas terminan rompiéndose cada vez que la organización de los datos
+cambia. Codd nota que el problema es el mismo en los sistemas de red, ya
+que tanto unos como otros obligan al usuario a depender de una colección
+fija de rutas de acceso.
+
+*** El modelo relacional como alternativa
+
+Frente a esto, Codd propone usar el término "relación" en su sentido
+matemático: dados varios conjuntos, una relación es un subconjunto del
+producto cartesiano de esos conjuntos, es decir, un conjunto de tuplas
+donde cada elemento de la tupla proviene de un conjunto distinto (un
+dominio). Representada como una tabla, esa relación tiene cinco
+propiedades: cada fila es una tupla, el orden de las filas no importa,
+las filas son todas distintas entre sí, el orden de las columnas
+corresponde al orden de los dominios, y cada columna lleva el nombre del
+dominio al que pertenece.
+
+Un punto que Codd aclara explícitamente: dos columnas pueden compartir el
+mismo dominio pero significar cosas distintas dentro de la misma
+relación. Su ejemplo es una relación llamada "componente", con dos
+columnas que se refieren a piezas pero en roles distintos (una pieza
+subordinada y la pieza de la que forma parte), más una tercera columna
+con la cantidad necesaria. Esto lo lleva a introducir el concepto de
+nombre de rol: cuando dos dominios idénticos aparecen en la misma
+relación, cada uno debe calificarse con un nombre que indique qué papel
+juega, de forma que el usuario pueda razonar sobre los datos sin
+depender de la posición de la columna.
+
+A partir de esto, Codd propone que la mayoría de los usuarios deberían
+trabajar con relaciones sin orden de dominios —lo que llama
+"relaciones" en sentido coloquial, distinguiéndolas de las relaciones
+matemáticas ordenadas— y que cada usuario solo necesita conocer el
+nombre de la relación y los nombres de sus dominios.
+
+*** Conceptos clave que introduce
+
+- *Dominio activo*: el conjunto de valores que efectivamente aparecen en
+  la base de datos en un instante dado, que es distinto del conjunto
+  teórico de todos los valores posibles de ese dominio.
+
+- *Clave primaria*: un dominio, o combinación de dominios, cuyos valores
+  identifican de forma única cada tupla de la relación. Codd exige que
+  sea no redundante: si es una combinación de varios dominios, ninguno de
+  ellos debe ser superfluo para lograr esa identificación única.
+
+- *Clave foránea*: un dominio de una relación R que no es su clave
+  primaria, pero cuyos valores corresponden a los valores de la clave
+  primaria de alguna relación S (que puede ser la misma R). Codd señala
+  que esto disuelve la distinción tradicional entre relaciones que
+  describen entidades y relaciones que describen vínculos entre
+  entidades, porque cualquier relación puede contener una clave foránea.
+
+- *Dominio no simple*: un dominio cuyos elementos no son valores
+  atómicos sino relaciones completas. El ejemplo que da Codd es el
+  historial salarial de un empleado: cada empleado tiene asociada una
+  relación binaria entre fecha y salario.
+
+*** Normalización
+
+Cuando una relación tiene dominios no simples, almacenarla requiere
+estructuras más complejas que un arreglo bidimensional. Codd propone un
+procedimiento para eliminar esos dominios no simples, al que llama
+normalización: se toma la clave primaria de la relación en la raíz del
+árbol de dependencias y se inserta en cada relación subordinada
+inmediata; la clave primaria de cada relación expandida queda formada
+por su clave original más la clave heredada de la relación padre. Luego
+se repite el proceso descendiendo por el árbol.
+
+Para que este procedimiento funcione, exige dos condiciones: que el
+grafo de interrelaciones entre los dominios no simples forme una
+colección de árboles, y que ninguna clave primaria tenga un dominio
+componente que sea no simple.
+
+El resultado de normalizar es una relación representable como un arreglo
+bidimensional homogéneo por columnas, sin punteros, sin dependencia de
+esquemas de hashing y sin índices ni listas de orden. Esto importa no
+solo para el almacenamiento sino para la comunicación de datos entre
+sistemas distintos.
+
+*** El lenguaje de datos
+
+Codd plantea que, una vez normalizado el modelo, es posible construir un
+lenguaje de subdatos universal basado en cálculo de predicados de primer
+orden. Llama a ese lenguaje R, y al lenguaje de programación en el que se
+embebería H. El poder de R no está en su capacidad de cómputo sino en su
+capacidad descriptiva: cualquier subconjunto de datos que tenga sentido
+extraer debe poder describirse con una fórmula de ese cálculo de
+predicados, y basta con admitir las fórmulas en forma normal prenexa
+para no perder expresividad.
+
+Un punto que destaca especialmente es lo que llama explotación simétrica
+de las relaciones: si el sistema almacena una relación, el usuario debe
+poder usar cualquier combinación de sus columnas como dato conocido para
+recuperar las columnas restantes, sin que el sistema le imponga una
+dirección de consulta. Codd compara esto con los sistemas de red, donde
+soportar todas las direcciones de consulta sobre una relación de grado n
+exigiría nombrar y mantener n factorial caminos distintos.
+
+*** Conjunto nombrado, expresable y almacenado
+
+Codd distingue tres colecciones asociadas a una base de datos: el
+conjunto nombrado, que son las relaciones que los usuarios pueden
+identificar por un nombre simple; el conjunto expresable, que es todo lo
+que puede construirse mediante expresiones del lenguaje de datos a partir
+del conjunto nombrado; y el conjunto almacenado, que es la
+representación física subyacente. El conjunto nombrado es un subconjunto,
+normalmente muy pequeño, del conjunto expresable.
+
+*** Operaciones sobre relaciones
+
+En la segunda parte del artículo, Codd define operaciones específicas
+para derivar relaciones a partir de otras.
+
+- *Permutación*: reordenar las columnas de una relación. Es irrelevante
+  para el modelo lógico del usuario, donde el orden de dominios no
+  importa, pero puede ser relevante para la representación física
+  almacenada.
+
+- *Proyección*: seleccionar un subconjunto de columnas y eliminar las
+  filas que queden duplicadas como resultado. Codd advierte que esta
+  eliminación de duplicados puede reducir el número de tuplas respecto a
+  la relación original.
+
+- *Join*: dado un dominio compartido entre dos relaciones binarias, el
+  join natural combina ambas en una relación ternaria sin pérdida de
+  información. Codd define con precisión cuándo dos relaciones son
+  "joinables" (cuando existe una relación ternaria cuyas proyecciones
+  reproducen exactamente las dos originales) y muestra que, si alguna de
+  las dos relaciones es una función, el join natural es el único join
+  posible. Si ninguna lo es, puede haber más de un join válido, y el
+  valor del dominio que genera esa pluralidad se llama punto de
+  ambigüedad.
+
+- *Join cíclico*: una extensión del join a tres relaciones que se
+  "cierran" entre sí (proveedor-pieza, pieza-proyecto, proyecto-proveedor,
+  por ejemplo), mucho más restrictivo en cuanto a cuándo admite más de
+  una solución que el join lineal entre las mismas relaciones.
+
+- *Composición*: generalización de la composición de funciones a
+  relaciones. T es una composición de R con S si existe algún join U de R
+  con S tal que T es la proyección de U sobre las columnas externas. Dos
+  relaciones son componibles si y solo si son joinables, aunque la
+  existencia de varios joins no implica necesariamente la existencia de
+  varias composiciones distintas.
+
+- *Restricción*: una operación que filtra una relación R conservando
+  solo las tuplas cuya proyección sobre ciertas columnas coincide con la
+  proyección de otra relación S sobre columnas equivalentes. Es la
+  generalización relacional de restringir una función a un subconjunto de
+  su dominio.
+
+*** La trampa de la conexión
+
+Codd dedica un párrafo a lo que llama la "trampa de la conexión"
+(connection trap). Describe el caso en que cada proveedor está enlazado
+mediante punteros a las piezas que suministra, y cada pieza está
+enlazada a los proyectos que la usan. La conclusión errónea consiste en
+asumir que seguir todos los caminos posibles desde un proveedor, pasando
+por sus piezas, hasta los proyectos, produce automáticamente el conjunto
+correcto de proyectos abastecidos por ese proveedor. Codd demuestra que
+esa conclusión solo es válida en el caso especial en que la relación
+buscada entre proyectos y proveedores coincide exactamente con la
+composición natural de las otras dos relaciones, y que esa coincidencia
+debe sostenerse para todo tiempo, no solo en un instante dado.
+
+*** Redundancia
+
+Codd separa la redundancia en el conjunto nombrado (la vista lógica del
+usuario) de la redundancia en el conjunto almacenado, y se concentra en
+la primera.
+
+- *Redundancia fuerte*: un conjunto de relaciones es fuertemente
+  redundante si contiene al menos una relación con una proyección que
+  puede derivarse, mediante una secuencia fija de operaciones, de
+  proyecciones de otras relaciones del conjunto. El ejemplo que da Codd
+  es una relación employee que incluye tanto el número de gerente como
+  el nombre del gerente: si el nombre del gerente siempre puede obtenerse
+  uniendo la propia relación employee contra sí misma a través del
+  número de gerente, esa columna de nombre es redundante en sentido
+  fuerte. Codd aclara que esta clase de redundancia suele existir por
+  conveniencia del usuario, por ejemplo para que programas antiguos que
+  referencian una relación semi-obsoleta sigan funcionando.
+
+- *Redundancia débil*: ocurre cuando una proyección no es derivable de
+  forma única de las demás, pero en todo momento coincide con alguna
+  composición posible de otras proyecciones, sin que exista una ecuación
+  fija que la describa. Codd señala que este tipo de redundancia suele
+  ser inherente a las necesidades lógicas de los usuarios y no puede
+  eliminarse por decisión del administrador del sistema.
+
+*** Consistencia
+
+Codd define un estado de la base de datos como la combinación de una
+colección de relaciones variables en el tiempo, un conjunto de
+restricciones que describen las redundancias que deben sostenerse, y un
+valor instantáneo de esas relaciones. El estado es consistente si ese
+valor instantáneo satisface las restricciones, e inconsistente en caso
+contrario.
+
+Un punto que señala explícitamente: la consistencia, tal como la define,
+es una propiedad del estado en un instante dado, independiente de cómo se
+llegó a él. No distingue entre una inconsistencia provocada por una
+omisión (faltó insertar un dato relacionado) o por un error directo
+(se insertó un dato incorrecto); en ambos casos el sistema solo puede
+detectar que el estado actual no satisface las restricciones, no por qué
+llegó a ese punto. Codd menciona dos estrategias prácticas para manejar
+esto: revisar la consistencia en cada operación de inserción, borrado o
+actualización de clave, a costa de ralentizar esas operaciones; o
+revisar la consistencia en lotes con menor frecuencia, apoyándose en un
+registro de transacciones para rastrear el origen de cualquier
+inconsistencia detectada.
+
+*** Notas y dudas propias
+
+- La distinción entre redundancia fuerte y débil me parece la parte más
+  sutil del artículo: la fuerte se puede expresar como una ecuación fija
+  entre proyecciones, la débil solo como "en todo instante existe alguna
+  composición que lo explica", sin que esa composición sea siempre la
+  misma. Vale la pena volver a esto cuando llegue a foreign keys y
+  constraints en SQL real.
+
+- El argumento de "n factorial caminos" para justificar el modelo
+  relacional frente al de red es, en el fondo, el mismo argumento que
+  hoy se usa para explicar por qué SQL permite hacer JOIN en cualquier
+  dirección sin tener que predefinir el sentido de la consulta.
+
+- Referencia completa: Codd, E. F. "A Relational Model of Data for Large
+  Shared Data Banks." Communications of the ACM, vol. 13, no. 6, junio de
+  1970, pp. 377-387.
