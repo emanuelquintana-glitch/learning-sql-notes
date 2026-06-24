@@ -319,3 +319,94 @@ Solución a Problemas Previos: Resuelve el problema de la "parálisis del esquem
 Limitaciones y Supuestos:
 El texto asume que el costo computacional de traducir consultas lógicas a rutas físicas eficientes es aceptable (lo cual fue cierto con el tiempo y mejoró con optimizadores), mientras que en 1970 los sistemas jerárquicos eran más rápidos para transacciones simples específicas.
 Asume que los usuarios pueden abstraerse completamente de la física, lo cual a veces es difícil en sistemas de rendimiento extremo donde el conocimiento de la estructura física sigue siendo relevante para la optimización manual.
+
+El texto de la página 380 de Codd constituye el núcleo de la transición del modelo relacional matemático (basado en conjuntos ordenados) al modelo relacional lógico (basado en conjuntos desordenados por nombres). El argumento central es que la dependencia de la posición de los dominios en una relación (ordenamiento implícito) introduce una fragilidad semántica y operativa inaceptable para el usuario final, especialmente en esquemas de alta aridez (grado elevado, como 30).
+
+Codd postula una distinción fundamental entre:
+
+Relación (Mathematical Relation): Un conjunto ordenado de tuplas donde la posición de los atributos es significativa ($A_1, A_2, \dots, A_n$). Cambiar el orden cambia la relación.
+Relación Lógica (User Relationship): Una entidad desordenada donde la identidad de los dominios se define por su nombre de rol (role name), no por su posición.
+La lógica del argumento se construye así:
+
+Premisa 1: En sistemas complejos, el orden de los dominios es arbitrario y difícil de recordar para el usuario.
+Premisa 2: Si el usuario debe depender de la posición (ej. "el tercer campo es el proyecto"), cualquier reordenamiento físico o lógico rompe la semántica de la consulta.
+Conclusión: El usuario debe interactuar con relaciones desordenadas, donde cada dominio está calificado por un nombre de rol único (ej. sub.part, super.part). Esto permite que la estructura de datos sea invariante ante permutaciones de posición.
+El texto introduce también la formalización de conceptos de integridad y referencia:
+
+Dominio Activo: El subconjunto de valores que realmente existen en la base de datos en un instante dado ($ActiveDomain \subseteq Domain$).
+Clave Primaria (Primary Key): Un dominio (o combinación) que identifica únicamente cada tupla. Debe ser no redundante (ningún subconjunto de sus componentes es superfluo).
+Clave Foránea (Foreign Key): Un dominio que referencia la clave primaria de otra relación (o de sí misma), estableciendo la integridad referencial sin necesidad de punteros físicos.
+Dominios No Simples: Permiten que los elementos de un dominio sean ellos mismos relaciones (relaciones anidadas), lo que anticipa la recursividad y la capacidad de manejar datos complejos dentro del marco relacional.
+El objetivo es desvincular la lógica de la implementación, estableciendo que la "identidad" de un atributo es su nombre, no su índice. Esto resuelve el problema de la rigidez de los sistemas jerárquicos y de red, donde la estructura de acceso era fija.
+
+** Citas y Evidencia Textual Clave
+
+#+BEGIN_QUOTE In many commercial, governmental, and scientific data banks, however, some of the relations are of quite high degree (a degree of 30 is not at all uncommon). Users should not normally be burdened with remembering the domain ordering of any relation (for example, the ordering supplier, then part, then project, then quantity in the relation supply). #+END_QUOTE Justificación: Establece la necesidad pragmática de abandonar el ordenamiento de dominios. La complejidad (grado 30) hace inviable la dependencia de la posición.
+
+#+BEGIN_QUOTE Accordingly, we propose that users deal, not with relations which are domain-ordered, but with relationships which are their domain-unordered counterparts. #+END_QUOTE Justificación: La tesis central. Propone el cambio ontológico de "relación matemática" a "relación lógica desordenada".
+
+#+BEGIN_QUOTE To accomplish this, domains must be uniquely identifiable at least within any given relation, without using position. Thus, where there are two or more identical domains, we require in each case that the domain name be qualified by a distinctive role name... #+END_QUOTE Justificación: Define el mecanismo de solución: la calificación por rol (role name) para resolver ambigüedades y eliminar la dependencia de la posición.
+
+#+BEGIN_QUOTE A primary key is nonredundant if it is either a simple domain (not a combination) or a combination such that none of the participating simple domains is superfluous in uniquely identifying each element. #+END_QUOTE Justificación: Define rigurosamente la propiedad de no redundancia en las claves primarias, evitando claves superfluas que no contribuyen a la unicidad.
+
+#+BEGIN_QUOTE A foreign key is not the primary key of R but its elements are values of the primary key of some relation S... #+END_QUOTE Justificación: Formaliza la integridad referencial, definiendo las claves foráneas como puentes lógicos entre relaciones sin necesidad de punteros físicos.
+
+#+BEGIN_QUOTE Nonatomic values can be discussed within the relational framework. Thus, some domains may have relations as elements. #+END_QUOTE Justificación: Expande el modelo relacional más allá de valores atómicos, permitiendo la recursividad y la estructura de datos compleja (relaciones anidadas).
+
+** Desglose de Conceptos y Formalización Matemática
+
+*** Conceptos Técnicos
+
+Dominio Ordenado vs. Desordenado:
+Ordenado: La identidad del atributo depende de su índice $i$ en la tupla.
+Desordenado: La identidad depende de un nombre de rol $n_i$.
+Role Name (Nombre de Rol): Un identificador semántico que califica un dominio para distinguir su función dentro de la relación (ej. supplier_id vs. part_id en una relación de suministro).
+Active Domain (Dominio Activo): El conjunto de valores reales presentes en la base de datos en un momento $t$. $$ ActiveDomain(R, A, t) \subseteq Domain(A) $$
+Primary Key (Clave Primaria): Subconjunto de dominios $K \subseteq {D_1, \dots, D_n}$ tal que para cualquier par de tuplas $t_1, t_2 \in R$, si $t_1[K] = t_2[K]$ entonces $t_1 = t_2$. Debe ser mínimo (no redundante).
+Foreign Key (Clave Foránea): Dominio $F$ en relación $R$ cuyos valores deben coincidir con los valores de una clave primaria $P$ en relación $S$ (o $R$ misma).
+Nonsimple Domain (Dominio No Simple): Un dominio cuyos elementos son conjuntos de valores o relaciones enteras (ej. un historial de salarios es una relación de fechas y montos).
+Repeating Group: (Mención de terminología obsoleta) Grupos de valores repetidos que el modelo relacional busca eliminar en favor de relaciones planas.
+*** Formalización Matemática y Lógica
+
+A. Relaciones Desordenadas (User Relationships)
+
+Sea $R$ una relación de grado $n$. En el modelo matemático tradicional, es un subconjunto de un producto cartesiano ordenado: $$ R \subseteq D_1 \times D_2 \times \dots \times D_n $$ Una tupla $t$ es una secuencia $(v_1, v_2, \dots, v_n)$ donde $v_i \in D_i$.
+
+En el modelo propuesto por Codd, la relación es un conjunto de asociaciones nombre-valor. Definimos una relación como un conjunto de funciones parciales o diccionarios: $$ R = { f \mid f: {N_1, \dots, N_k} \to \bigcup_{i=1}^n D_i, \text{ donde } f(N_i) \in D_i } $$ Donde $N_i$ son los nombres de rol (role names) que identifican los dominios, no sus posiciones. Si hay dominios idénticos (mismo tipo de dato), se requiere calificación: $$ \text{dom}(N_i) = D, \quad \text{dom}(N_j) = D, \quad i \neq j \implies N_i \neq N_j \text{ (por rol)} $$ Ejemplo del texto: component tiene dominios sub.part, super.part, quantity. La tupla $t$ se representa como: $$ t = { (\text{sub.part}, p_1), (\text{super.part}, p_2), (\text{quantity}, q) } $$ El orden de estos pares es irrelevante.
+
+B. Integridad de Claves
+
+Clave Primaria (Primary Key): Sea $K = {A_1, \dots, A_m}$ un subconjunto de atributos de $R$. $$ \forall t_1, t_2 \in R: \left( \forall A_i \in K, t_1[A_i] = t_2[A_i] \right) \implies t_1 = t_2 $$ No Redundancia: $K$ es mínima si para todo $A_j \in K$, el conjunto $K \setminus {A_j}$ no satisface la condición de unicidad.
+
+Clave Foránea (Foreign Key): Sea $F$ un conjunto de atributos en $R$ y $P$ una clave primaria en $S$. $$ \forall t \in R: t[F] \in \pi_F(\sigma_{P=t[P]}(S)) $$ O más simplemente: $$ \pi_F(R) \subseteq \pi_P(S) $$ Esto asegura que cada valor en la clave foránea existe como clave primaria en la relación referenciada.
+
+C. Dominios No Simples y Recursividad
+
+Si un dominio $D_{hist}$ es "no simple", su conjunto de valores son relaciones. Sea $D_{salary_hist} = { r \mid r \subseteq \text{Date} \times \text{Amount} }$. Una tupla en la relación employee puede tener un valor $h \in D_{salary_hist}$: $$ t_{emp} = { (\text{name}, \text{"John"}), (\text{salary_hist}, h) } $$ Donde $h = { (\text{date}_1, \text{amount}_1), (\text{date}_2, \text{amount}_2), \dots }$. Esto formaliza la capacidad de almacenar estructuras de datos complejas dentro de un dominio atómico en el nivel superior, manteniendo la integridad relacional.
+
+D. Dominio Activo
+
+El dominio activo es dinámico: $$ ActiveDomain(R, A, t) = { v \mid \exists t' \in R(t'), t'[A] = v } $$ Contraste con el dominio teórico (todos los valores posibles): $$ ActiveDomain(R, A, t) \subseteq Domain(A) $$
+
+** Importancia y Relevancia Teórica
+
+Este fragmento es crucial porque formaliza la abstracción de datos que permite que el modelo relacional sea usable en la práctica, no solo teóricamente.
+
+Innovación en la Interacción Humano-Máquina: Al proponer la independencia del orden de los dominios, Codd elimina la carga cognitiva de recordar la posición de los atributos. Esto es fundamental para la usabilidad de SQL y los lenguajes declarativos. El usuario dice "elige el nombre", no "elige el tercer campo".
+
+Integridad Referencial sin Punteros: La definición de claves foráneas como valores (no punteros) permite que la integridad de los datos sea una propiedad lógica del conjunto de datos, no una propiedad de la estructura física de acceso. Esto facilita la normalización, la integridad y la portabilidad de los datos.
+
+Generalización del Modelo: La inclusión de dominios no simples y la capacidad de manejar relaciones anidadas amplían el alcance del modelo relacional más allá de tablas planas, anticipando conceptos modernos de bases de datos semirrelacionales y JSON.
+
+Crítica a la Terminología Obsoleta: Al vincular los conceptos de "atributo" y "repeating group" (términos de sistemas jerárquicos) con dominios simples y no simples, Codd proporciona un marco teórico para migrar y reemplazar sistemas antiguos sin perder la semántica.
+
+Implicaciones Metodológicas:
+
+Diseño de Esquemas: Obliga a los diseñadores a pensar en nombres semánticos y roles, no en archivos físicos.
+Optimización: El sistema debe traducir consultas basadas en nombres a rutas de acceso físicas eficientes, un desafío que impulsó el desarrollo de optimizadores de consultas.
+Normalización: La definición rigurosa de claves primarias y foráneas es la base de la teoría de normalización (1NF, 2NF, 3NF, BCNF).
+Limitaciones y Supuestos:
+
+Asume que el sistema de gestión puede manejar eficientemente la sobrecarga de verificar integridad referencial en claves foráneas en tiempo real (un problema de rendimiento que se resolvió con índices y restricciones diferidas).
+Asume que los usuarios pueden abstraerse completamente de la estructura física, lo cual a veces requiere compromisos en sistemas de alto rendimiento específico.
+La formalización de dominios no simples introduce complejidad en la consulta y el procesamiento, lo que eventualmente llevó a la distinción entre modelos relacionales puros y modelos orientados a objetos.
