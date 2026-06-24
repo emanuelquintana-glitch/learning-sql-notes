@@ -165,3 +165,7 @@ ORDER BY saldo_total DESC;
 Esta seccion contiene alguna informacion de fondo sobre sistemas de bases de datos pre-relacionales. Durante las primeras varias decadas de sistemas de bases de datos computarizados, los datos se almacenaban y se representaban a los usuarios de diversas maneras. En un sistema de base de datos jerarquico, por ejemplo, los datos se presentaban como una o mas estructuras de arbol.
 
 Tanto los sistemas de bases de datos jerárquicos como los sistemas de bases de datos en red están vivos y saludables hoy en día, aunque generalmente en el mundo de los mainframes. Además, los sistemas de bases de datos jerárquicos han disfrutado de un renacimiento en el ambito de los servicios de directorio, como el Active Directory de Microsoft y el servidor de directorio de codigo abierto Apache. Sin embargo, a partir de la decada de 1970, surgio una nueva forma de representar datos, que era mas rigurosa pero facil de entender e implementar.
+
+** El Modelo Relacional
+
+En 1970, el Dr. E. F. Codd del laboratorio de investigacion de IBM publico un articulo titulado "A relational Model of Data for Large Share Data Banks" que propuso que los datos se representaran como conjuntos de tablas. En lugar de utilizar punteros para navegar entre entidades relacionadas, se utilizan datos redundantes para vincular registros en diferentes tablas.
