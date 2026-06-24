@@ -145,7 +145,7 @@ ORDER BY saldo_total DESC;
 |-----+------------+-------------+--------------------+----------------|
 | SBL |          1 |    50000.00 |            50000.0 |                |
 | CHK |         13 |    32787.16 | 2522.0892307692307 |                |
-| MM  |          3 |    17045.14 |  5681.713333333333 |                |
+| MM  |          3   |    17045.14 |  5681.713333333333 |                |
 | CD  |          1 |    10000.00 |            10000.0 |                |
 | SAV |          5 |     2055.76 |            411.152 |                |
 | BUS |          2 |        0.00 |                0.0 |                |
@@ -159,3 +159,9 @@ ORDER BY saldo_total DESC;
 - ¿Qué es ~pending_balance~ vs ~avail_balance~?
   → ~avail_balance~: saldo disponible ahora.
   → ~pending_balance~: incluye transacciones no liquidadas aún.
+
+**  Sistemas de bases de datos no relacionales
+
+Esta seccion contiene alguna informacion de fondo sobre sistemas de bases de datos pre-relacionales. Durante las primeras varias decadas de sistemas de bases de datos computarizados, los datos se almacenaban y se representaban a los usuarios de diversas maneras. En un sistema de base de datos jerarquico, por ejemplo, los datos se presentaban como una o mas estructuras de arbol.
+
+Tanto los sistemas de bases de datos jerárquicos como los sistemas de bases de datos en red están vivos y saludables hoy en día, aunque generalmente en el mundo de los mainframes. Además, los sistemas de bases de datos jerárquicos han
