@@ -7,3 +7,6 @@
 [13:32:40] ✓ _quarto.yml actualizado
 [13:32:40] === Exportación inicial completa ===
 [13:32:40] Observando /home/emanuel/org/libros/Lenguajes_de_Programacion ...
+[13:41:45] Cambio detectado: /home/emanuel/org/libros/Lenguajes_de_Programacion/javascript-patterns.org
+[13:41:45] SKIP: no se reconoce el libro para javascript-patterns
+[13:41:45] ─────────────────────────────
