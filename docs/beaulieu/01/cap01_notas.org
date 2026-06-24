@@ -825,3 +825,80 @@ Asume que las operaciones son perfectas y que los datos son consistentes. En la 
 La definición de "para todo tiempo" requiere que las restricciones sean invariantes, lo cual puede no ser cierto en sistemas con lógica de negocio compleja que cambia con el tiempo.
 La complejidad de calcular la derivabilidad puede ser alta en esquemas muy grandes, aunque el optimizador del SGBD debe manejar esto automáticamente.
 Este texto completa la sección de operaciones y redundancia, proporcionando un marco completo y riguroso para entender cómo se manipulan, combinan y optimizan los datos en el modelo relacional. Es la base teórica que permite a los sistemas modernos manejar datos complejos de manera eficiente, consistente y libre de errores de inferencia.
+
+Análisis Teórico: Redundancia (Fuerte y Débil) y Consistencia en el Modelo Relacional (Codd, 1970, pp. 386-387)
+** Explicación Conceptual Detallada
+
+El texto de las páginas 386 y 387 (identificadas erróneamente como 356 y 387 en la transición, pero correspondientes a la continuidad del análisis de Codd sobre redundancia y consistencia) establece una distinción crítica entre la redundancia en el conjunto nombrado (la vista lógica del usuario) y la redundancia en el conjunto almacenado (la implementación física). Codd argumenta que la redundancia no es inherentemente negativa; puede ser una herramienta deliberada para la conveniencia del usuario o la compatibilidad con sistemas heredados, siempre que se gestione bajo reglas estrictas de consistencia.
+
+La lógica del argumento se despliega en tres niveles:
+
+Redundancia Fuerte (Strong Redundancy): Se define formalmente como una relación (o su proyección) que es derivada de otras relaciones en el conjunto nombrado mediante operaciones algebraicas (proyección, join natural, restricción). Es una relación matemática precisa: $R_i = f(R_1, \dots, R_n)$. El ejemplo clásico es una relación employee que contiene managername, la cual es derivable de una relación manager unida a employee vía manager#. Esta redundancia es "fuerte" porque la relación debe mantenerse igual para todo tiempo ($t$), independientemente de los cambios en los datos.
+Redundancia Débil (Weak Redundancy): Es una condición más laxa donde una relación no es derivable de manera única (no existe una ecuación fija), pero sus valores en cualquier instante son consistentes con alguna composición o join de otras relaciones. Ocurre cuando existen ambigüedades o relaciones complejas (muchos-a-muchos) que no permiten una función única, pero donde existen restricciones semánticas que vinculan los datos. A diferencia de la fuerte, no se puede expresar como una ecuación simple, sino como una propiedad de pertenencia a un conjunto de composiciones posibles.
+Consistencia: Se define como la propiedad de un estado instantáneo de la base de datos de satisfacer el conjunto de restricciones ($\Sigma$) que definen las redundancias. Si la base de datos es redundante (fuerte o débil), el sistema debe verificar que los datos actualizados no violen las reglas de derivación o composición. Codd destaca que la consistencia es una propiedad del estado instantáneo, no del proceso que lo generó (omisión o comisión de errores).
+El objetivo es proporcionar un marco formal para gestionar la redundancia: permitirla cuando es útil (para rendimiento o compatibilidad) pero asegurando que el sistema pueda detectar y prevenir inconsistencias. Esto es fundamental para la integridad de los datos en sistemas donde la normalización estricta (eliminación total de redundancia) puede no ser práctica o deseable por razones de rendimiento.
+
+** Citas y Evidencia Textual Clave
+
+#+BEGIN_QUOTE Redundancy in the named set of relations must be distinguished from redundancy in the stored set of representations. We are primarily concerned here with the former. #+END_QUOTE Justificación: Establece la distinción fundamental entre la redundancia lógica (vista del usuario) y la física (almacenamiento), enfocándose en la primera como un problema de diseño de esquema y semántica.
+
+#+BEGIN_QUOTE A relation R is $\mathcal{O}$-derivable from a set S of relations if there exists a sequence of operations from the collection $\mathcal{O}$ which, for all time, yields R from members of S. #+END_QUOTE Justificación: Define rigurosamente la derivabilidad, la base de la redundancia fuerte. La cláusula "for all time" es crucial: la relación debe ser una consecuencia lógica permanente de las otras, no solo en un instante dado.
+
+#+BEGIN_QUOTE A set of relations is strongly redundant if it contains at least one relation that possesses a projection which is derivable from other projections of relations in the set. #+END_QUOTE Justificación: La definición formal de Redundancia Fuerte. Permite identificar relaciones que son meramente vistas derivadas y que, por tanto, no necesitan almacenamiento físico independiente si se puede garantizar su consistencia.
+
+#+BEGIN_QUOTE A collection of relations is weakly redundant if it contains a relation that has a projection which is not derivable from other members but is at all times a projection of some join of other projections of relations in the collection. #+END_QUOTE Justificación: Define la Redundancia Débil, capturando situaciones donde la relación no es única pero es consistente con el conjunto de otras relaciones. Es más difícil de detectar y gestionar que la fuerte.
+
+#+BEGIN_QUOTE Given a collection C of time-varying relations, an associated set $\Sigma$ of constraint statements and an instantaneous value V for C, we shall call the state (C, $\Sigma$, V) consistent or inconsistent according as V does or does not satisfy $\Sigma$. #+END_QUOTE Justificación: Formaliza el concepto de Consistencia. Una base de datos es consistente si su estado actual satisface las restricciones definidas por las redundancias. Es una propiedad de estado, no de transacción.
+
+#+BEGIN_QUOTE It is important to note that consistency as defined above is a property of the instantaneous state of a data bank, and is independent of how that state came about. #+END_QUOTE Justificación: Aclara que la consistencia se verifica en el resultado final, sin importar si el error fue por omisión (falta de actualización) o comisión (actualización incorrecta). El sistema debe ser capaz de detectar la inconsistencia independientemente de su origen.
+
+** Desglose de Conceptos y Formalización Matemática
+
+*** Conceptos Técnicos
+
+Redundancia Fuerte (Strong Redundancy): Una relación $R$ es fuerte-mente redundante si existe una expresión algebraica $E$ sobre otras relaciones $S$ tal que $R = E(S)$ para todo $t$.
+Redundancia Débil (Weak Redundancy): Una relación $R$ es débil-mente redundante si no es derivable de forma única, pero para todo $t$, $R(t) \subseteq \pi(E(S(t)))$ para alguna composición $E$ y proyección $\pi$.
+Derivabilidad ($\mathcal{O}$-derivable): La propiedad de que una relación puede ser generada a partir de otras mediante un conjunto de operaciones $\mathcal{O}$ (join natural, proyección, restricción, tie).
+Consistencia: Un estado $V$ es consistente con un conjunto de restricciones $\Sigma$ si $V \models \Sigma$.
+Conjunto Nombrado (Named Set): La colección de relaciones que los usuarios pueden identificar por nombre.
+Conjunto Almacenado (Stored Set): Las representaciones físicas de las relaciones.
+Restricción (Restriction): Una operación que filtra una relación $R$ basándose en los valores de otra relación $S$ en dominios comunes.
+*** Formalización Matemática y Lógica
+
+A. Redundancia Fuerte
+
+Sea $\mathcal{S} = {R_1, R_2, \dots, R_k}$ un conjunto de relaciones. Una relación $R_i \in \mathcal{S}$ es fuerte-mente redundante si existe una expresión $\mathcal{E}$ compuesta por operaciones en $\mathcal{O} = {\text{join}, \text{proj}, \text{restriction}, \text{tie}}$ tal que: $$ \forall t: R_i(t) = \mathcal{E}(R_1(t), \dots, R_{i-1}(t), R_{i+1}(t), \dots, R_k(t)) $$ Ejemplo 1 (Empleado-Manager): Sea $E(\text{serial#}, \text{name}, \text{manager#}, \text{managername})$. Sea $M(\text{serial#}, \text{name})$ (relación de managers). La redundancia es fuerte si: $$ \pi_{\text{managername}}(E) = \pi_{\text{serial#, name}}(E) \bowtie M $$ O más simplemente, si $E$ se puede derivar de $E'(\text{serial#}, \text{name}, \text{manager#})$ y $M$.
+
+Ejemplo 2 (Proveedores, Departamentos, Proyectos): Sean $P(s#, d#, \dots)$, $Q(s#, j#, \dots)$, $R(d#, j#, \dots)$. Condición $C$: $s$ suministra a $d$ si y solo si $s$ suministra a un proyecto $j$ al que $d$ está asignado. Esto se expresa como: $$ \pi_{s#, d#}(P) = \pi_{s#, j#}(Q) \bowtie \pi_{d#, j#}(R) $$ Si esta ecuación se cumple para todo $t$, entonces $P$ es fuerte-mente redundante respecto a $Q$ y $R$.
+
+B. Redundancia Débil
+
+Una relación $R_i$ es débil-mente redundante si:
+
+No existe una expresión única $\mathcal{E}$ tal que $R_i(t) = \mathcal{E}(S(t))$ para todo $t$.
+Pero $\forall t$, existe algunas composiciones $C_t$ de otras relaciones tal que $R_i(t) \subseteq \pi(C_t(S(t)))$. Esto ocurre cuando hay ambigüedades (puntos de ambigüedad) que impiden una función única, pero las relaciones están vinculadas por restricciones semánticas. Ejemplo: Si $P, Q, R$ del ejemplo anterior no cumplen la condición $C$ para todo $t$, pero siempre existen combinaciones que las vinculan, entonces hay redundancia débil.
+C. Consistencia
+
+Sea $V = (v_1, v_2, \dots, v_k)$ el estado instantáneo de las relaciones $R_1, \dots, R_k$. Sea $\Sigma = { \phi_1, \phi_2, \dots, \phi_m }$ un conjunto de restricciones (ecuaciones o implicaciones lógicas). El estado $V$ es consistente si: $$ V \models \Sigma \iff \forall \phi \in \Sigma, \phi(V) \text{ es verdadero} $$ Ejemplo de verificación de consistencia para la restricción de composición: Dado $T$ es composición de $R$ y $S$: $$ \forall (a, c) \in \pi_{12}(T), \exists b : (a, b) \in \pi_{12}(R) \land (b, c) \in \pi_{12}(S) $$ Si esta condición se viola en algún instante, el estado es inconsistente.
+
+D. Operación de Restricción
+
+La restricción de $R$ por $S$ en dominios $L$ y $M$: $$ R \restriction_{L,M} S = { t \in R \mid \pi_L(t) \in \pi_M(S) } $$ Donde $L$ e $M$ son listas de índices de columnas de igual longitud.
+
+** Importancia y Relevancia Teórica
+
+Este texto es fundamental porque aborda el problema de la integridad y la redundancia en sistemas de bases de datos, un tema que sigue siendo central en el diseño de esquemas y la gestión de datos.
+
+Gestión de la Redundancia: Codd demuestra que la redundancia no es un mal absoluto. La redundancia fuerte puede ser útil para la conveniencia del usuario (evitar joins complejos en consultas frecuentes) o para la compatibilidad con sistemas heredados. El punto clave es que debe ser controlada y consistente.
+Fundamento de las Restricciones de Integridad: La definición de consistencia y las restricciones ($\Sigma$) son la base de las constraints modernas (claves foráneas, restricciones de verificación, triggers). El modelo relacional permite declarar explícitamente las reglas de negocio que deben cumplirse.
+Distinción entre Lógico y Físico: Al distinguir entre redundancia en el conjunto nombrado y en el almacenado, Codd permite que el administrador de la base de datos elija estrategias de almacenamiento (ej. materializar vistas derivadas para rendimiento) sin afectar la lógica del usuario, siempre que se mantenga la consistencia.
+Algoritmos de Verificación: El texto sugiere la existencia de algoritmos para verificar la consistencia (ej. verificar si una tupla en $T$ tiene una correspondencia en $R$ y $S$). Esto es la base de los mecanismos de integridad referencial y verificación de constraints en los SGBD.
+Implicaciones Prácticas:
+Diseño de Esquemas: Permite diseñar esquemas que incluyen vistas derivadas (redundancia fuerte) para optimizar consultas, sabiendo que el sistema puede verificar su consistencia.
+Mantenimiento: Si una relación es fuerte-mente redundante, las actualizaciones deben propagarse a todas las relaciones derivadas para mantener la consistencia. Esto es un desafío de transaccionalidad.
+Rendimiento: La redundancia débil y fuerte pueden mejorar el rendimiento de consultas al evitar joins costosos, pero a costa de un mayor costo de actualización y almacenamiento.
+Limitaciones y Supuestos:
+Asume que el sistema puede detectar y hacer cumplir las restricciones de consistencia en tiempo real, lo cual puede ser costoso en sistemas de gran escala con alta concurrencia.
+La distinción entre redundancia fuerte y débil puede ser difusa en la práctica, especialmente cuando las reglas de negocio son complejas o cambian con el tiempo.
+El enfoque en consistencia instantánea puede no ser suficiente para sistemas que requieren consistencia eventual o transaccional a largo plazo.
+Este trabajo completa la trilogía de la teoría relacional sobre la manipulación y consistencia de datos: operaciones algebraicas, redundancia y consistencia. Proporciona un marco riguroso para diseñar, implementar y mantener bases de datos relacionales que sean tanto flexibles como confiables, sentando las bases para los sistemas de gestión de datos modernos que equilibran rendimiento, integridad y usabilidad.
